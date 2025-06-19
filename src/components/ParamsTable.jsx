@@ -1,38 +1,25 @@
 import React from "react";
 
-export default function ParamsTable({
-  title,
-  params,
-  setParams,
-  hasRequired = false,
-}) {
-  const updateParam = (i, key, value) => {
-    const next = params.slice();
-    next[i][key] = value;
-    setParams(next);
-  };
-
-  const addParam = () => {
-    setParams([
-      ...params,
-      { name: "", type: "", required: false, description: "" },
-    ]);
-  };
-
-  const removeParam = (i) => {
-    setParams(params.filter((_, idx) => idx !== i));
-  };
-
+export default function ParamsTable({ title, params, setParams, hasRequired }) {
   return (
     <div className="mb-4">
-      <div className="flex items-center mb-2">
-        <h3 className="font-semibold text-md flex-1">{title}</h3>
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="font-bold text-md">{title}</h3>
         <button
-          type="button"
-          onClick={addParam}
-          className="ml-2 bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700 text-xs"
+          className="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded text-xs"
+          onClick={() =>
+            setParams((params) => [
+              ...params,
+              {
+                name: "",
+                type: "",
+                required: !!hasRequired,
+                description: "",
+              },
+            ])
+          }
         >
-          + Add
+          + Add Param
         </button>
       </div>
       <table className="w-full border mb-2 text-xs">
@@ -50,45 +37,74 @@ export default function ParamsTable({
             <tr key={idx}>
               <td className="border px-2 py-1">
                 <input
-                  className="w-full border rounded px-1 py-0.5"
+                  className="w-full border-none outline-none text-black dark:text-white bg-transparent"
                   value={row.name}
-                  onChange={(e) => updateParam(idx, "name", e.target.value)}
+                  onChange={(e) =>
+                    setParams((p) =>
+                      p.map((item, i) =>
+                        i === idx ? { ...item, name: e.target.value } : item
+                      )
+                    )
+                  }
+                  placeholder="param name"
                 />
               </td>
               <td className="border px-2 py-1">
                 <input
-                  className="w-full border rounded px-1 py-0.5"
+                  className="w-full border-none outline-none text-black dark:text-white bg-transparent"
                   value={row.type}
-                  onChange={(e) => updateParam(idx, "type", e.target.value)}
+                  onChange={(e) =>
+                    setParams((p) =>
+                      p.map((item, i) =>
+                        i === idx ? { ...item, type: e.target.value } : item
+                      )
+                    )
+                  }
+                  placeholder="string"
                 />
               </td>
               {hasRequired && (
                 <td className="border px-2 py-1 text-center">
                   <input
                     type="checkbox"
-                    checked={row.required}
+                    checked={!!row.required}
                     onChange={(e) =>
-                      updateParam(idx, "required", e.target.checked)
+                      setParams((p) =>
+                        p.map((item, i) =>
+                          i === idx
+                            ? { ...item, required: e.target.checked }
+                            : item
+                        )
+                      )
                     }
                   />
                 </td>
               )}
               <td className="border px-2 py-1">
                 <input
-                  className="w-full border rounded px-1 py-0.5"
+                  className="w-full border-none outline-none text-black dark:text-white bg-transparent"
                   value={row.description}
                   onChange={(e) =>
-                    updateParam(idx, "description", e.target.value)
+                    setParams((p) =>
+                      p.map((item, i) =>
+                        i === idx
+                          ? { ...item, description: e.target.value }
+                          : item
+                      )
+                    )
                   }
+                  placeholder="Short description"
                 />
               </td>
               <td className="border px-2 py-1 text-center">
                 <button
-                  type="button"
-                  onClick={() => removeParam(idx)}
-                  className="text-xs text-red-600 hover:underline"
+                  className="text-red-600 hover:text-red-800 text-xs"
+                  onClick={() =>
+                    setParams((p) => p.filter((_, i) => i !== idx))
+                  }
+                  title="Remove"
                 >
-                  Remove
+                  ✕
                 </button>
               </td>
             </tr>
