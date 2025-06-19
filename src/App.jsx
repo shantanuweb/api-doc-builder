@@ -273,7 +273,11 @@ export default function App() {
       <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8">
         <div className="bg-white dark:bg-gray-800 p-4 rounded shadow">
           {mode === "analyzer" ? (
-            <AutoAnalyzer setData={setData} />
+            <AutoAnalyzer
+  setData={setData}
+  setRequestParams={setRequestParams}
+  setResponseParams={setResponseParams}
+/>
           ) : (
             <ManualDocEditor
               data={data}

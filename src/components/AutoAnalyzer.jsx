@@ -1,14 +1,33 @@
 import React, { useState } from "react";
 
-export default function AutoAnalyzer({ setData }) {
+function inferParamsFromObject(obj) {
+  if (!obj || typeof obj !== "object") return [];
+  return Object.entries(obj).map(([key, value]) => ({
+    name: key,
+    type: Array.isArray(value)
+      ? "array"
+      : value === null
+      ? "null"
+      : typeof value,
+    description: "",
+  }));
+}
+
+export default function AutoAnalyzer({
+  setData,
+  setRequestParams,
+  setResponseParams,
+}) {
   const [endpoint, setEndpoint] = useState("");
   const [method, setMethod] = useState("GET");
   const [headers, setHeaders] = useState('{"Content-Type": "application/json"}');
   const [body, setBody] = useState("");
   const [error, setError] = useState("");
+  const [apiResponse, setApiResponse] = useState(null);
 
   const handleAnalyze = async () => {
     setError("");
+    setApiResponse(null);
     let parsedHeaders = {};
     try {
       parsedHeaders = headers ? JSON.parse(headers) : {};
@@ -17,6 +36,7 @@ export default function AutoAnalyzer({ setData }) {
       return;
     }
 
+    // Infer request params from JSON body if present
     if (["POST", "PUT", "PATCH"].includes(method)) {
       if (
         !parsedHeaders["Content-Type"] ||
@@ -38,6 +58,8 @@ export default function AutoAnalyzer({ setData }) {
         setError("Please provide a non-empty JSON body.");
         return;
       }
+      // Update request params
+      setRequestParams(inferParamsFromObject(bodyObj));
     }
 
     try {
@@ -55,6 +77,9 @@ export default function AutoAnalyzer({ setData }) {
         setError("Response is not valid JSON. See raw response below.");
         json = { raw: responseText };
       }
+
+      setApiResponse(json);
+      setResponseParams(inferParamsFromObject(json));
       setData((d) => ({
         ...d,
         baseUrl: endpoint.replace(/\/[\w\-]+$/, ""),
@@ -65,7 +90,13 @@ export default function AutoAnalyzer({ setData }) {
         response: json,
       }));
     } catch (err) {
-      setError("Cannot fetch! Check endpoint, CORS, headers, or body JSON.");
+      setError(
+        "Cannot fetch! This may be due to:\n" +
+          "• API endpoint is wrong\n" +
+          "• JSON in headers or body is invalid\n" +
+          "• CORS (the API blocks browser access)\n\n" +
+          "Try Manual Entry mode if you are stuck, or use a mock API endpoint."
+      );
     }
   };
 
@@ -77,14 +108,14 @@ export default function AutoAnalyzer({ setData }) {
           type="text"
           value={endpoint}
           onChange={(e) => setEndpoint(e.target.value)}
-          className="border px-2 py-1 rounded"
+          className="border px-2 py-1 rounded text-black dark:text-white bg-white dark:bg-gray-800"
           placeholder="https://api.example.com/auth/login"
         />
         <label className="font-medium">Method</label>
         <select
           value={method}
           onChange={(e) => setMethod(e.target.value)}
-          className="border px-2 py-1 rounded"
+          className="border px-2 py-1 rounded text-black dark:text-white bg-white dark:bg-gray-800"
         >
           <option>GET</option>
           <option>POST</option>
@@ -96,7 +127,7 @@ export default function AutoAnalyzer({ setData }) {
         <textarea
           value={headers}
           onChange={(e) => setHeaders(e.target.value)}
-          className="border px-2 py-1 rounded font-mono"
+          className="border px-2 py-1 rounded font-mono text-black dark:text-white bg-white dark:bg-gray-800"
           rows={2}
           placeholder='{"Content-Type": "application/json"}'
         />
@@ -108,7 +139,7 @@ export default function AutoAnalyzer({ setData }) {
             <textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}
-              className="border px-2 py-1 rounded font-mono"
+              className="border px-2 py-1 rounded font-mono text-black dark:text-white bg-white dark:bg-gray-800"
               rows={3}
               placeholder='{"key":"value"}'
             />
@@ -120,7 +151,17 @@ export default function AutoAnalyzer({ setData }) {
         >
           Submit &amp; Generate
         </button>
-        {error && <div className="text-red-600 mt-2">{error}</div>}
+        {error && (
+          <div className="text-red-600 mt-2 whitespace-pre-line">
+            {error}
+          </div>
+        )}
+        {apiResponse && (
+          <div className="mt-4 bg-gray-100 dark:bg-gray-900 p-2 rounded font-mono text-xs overflow-x-auto">
+            <b>Response:</b>
+            <pre>{JSON.stringify(apiResponse, null, 2)}</pre>
+          </div>
+        )}
       </div>
     </div>
   );
