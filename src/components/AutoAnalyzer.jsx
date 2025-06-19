@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 
+// Helper to infer param types from JSON
 function inferParamsFromObject(obj) {
   if (!obj || typeof obj !== "object") return [];
   return Object.entries(obj).map(([key, value]) => ({
@@ -9,6 +10,7 @@ function inferParamsFromObject(obj) {
       : value === null
       ? "null"
       : typeof value,
+    required: true,
     description: "",
   }));
 }
@@ -24,6 +26,23 @@ export default function AutoAnalyzer({
   const [body, setBody] = useState("");
   const [error, setError] = useState("");
   const [apiResponse, setApiResponse] = useState(null);
+  const [queryParams, setQueryParams] = useState([{ name: "", value: "" }]);
+
+  // Build full URL for GET
+  const buildUrlWithQuery = () => {
+    if (method !== "GET" || !queryParams.length) return endpoint;
+    const params = queryParams
+      .filter((p) => p.name.trim() !== "")
+      .map(
+        (p) =>
+          `${encodeURIComponent(p.name)}=${encodeURIComponent(p.value ?? "")}`
+      )
+      .join("&");
+    if (!params) return endpoint;
+    return endpoint.includes("?")
+      ? `${endpoint}&${params}`
+      : `${endpoint}?${params}`;
+  };
 
   const handleAnalyze = async () => {
     setError("");
@@ -36,7 +55,7 @@ export default function AutoAnalyzer({
       return;
     }
 
-    // Infer request params from JSON body if present
+    // POST/PUT/PATCH: infer request params from body JSON
     if (["POST", "PUT", "PATCH"].includes(method)) {
       if (
         !parsedHeaders["Content-Type"] ||
@@ -58,12 +77,27 @@ export default function AutoAnalyzer({
         setError("Please provide a non-empty JSON body.");
         return;
       }
-      // Update request params
       setRequestParams(inferParamsFromObject(bodyObj));
     }
 
+    // GET: infer request params from query table
+    if (method === "GET") {
+      const paramsForTable = queryParams
+        .filter((p) => p.name.trim() !== "")
+        .map((p) => ({
+          name: p.name,
+          type: "string",
+          required: false,
+          description: "",
+        }));
+      setRequestParams(paramsForTable);
+    }
+
+    // Compose URL for fetch
+    const fetchUrl = method === "GET" ? buildUrlWithQuery() : endpoint;
+
     try {
-      const res = await fetch(endpoint, {
+      const res = await fetch(fetchUrl, {
         method,
         headers: parsedHeaders,
         body: ["POST", "PUT", "PATCH"].includes(method) ? body : undefined,
@@ -100,6 +134,21 @@ export default function AutoAnalyzer({
     }
   };
 
+  // Query Params table handlers
+  const handleQueryParamChange = (idx, field, value) => {
+    setQueryParams((params) =>
+      params.map((p, i) =>
+        i === idx ? { ...p, [field]: value } : p
+      )
+    );
+  };
+  const handleAddQueryParam = () => {
+    setQueryParams((params) => [...params, { name: "", value: "" }]);
+  };
+  const handleRemoveQueryParam = (idx) => {
+    setQueryParams((params) => params.filter((_, i) => i !== idx));
+  };
+
   return (
     <div className="mb-4">
       <div className="flex flex-col gap-2">
@@ -123,6 +172,73 @@ export default function AutoAnalyzer({
           <option>PATCH</option>
           <option>DELETE</option>
         </select>
+
+        {/* Show query params editor only for GET */}
+        {method === "GET" && (
+          <div className="mb-2">
+            <label className="font-medium">Query Parameters</label>
+            <table className="w-full border mb-2 text-xs mt-1">
+              <thead>
+                <tr>
+                  <th className="border px-2 py-1">Name</th>
+                  <th className="border px-2 py-1">Value</th>
+                  <th className="border px-2 py-1"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {queryParams.map((param, idx) => (
+                  <tr key={idx}>
+                    <td className="border px-2 py-1">
+                      <input
+                        type="text"
+                        value={param.name}
+                        onChange={(e) =>
+                          handleQueryParamChange(idx, "name", e.target.value)
+                        }
+                        className="w-full border px-1 py-1 rounded text-black dark:text-white bg-white dark:bg-gray-800"
+                        placeholder="key"
+                      />
+                    </td>
+                    <td className="border px-2 py-1">
+                      <input
+                        type="text"
+                        value={param.value}
+                        onChange={(e) =>
+                          handleQueryParamChange(idx, "value", e.target.value)
+                        }
+                        className="w-full border px-1 py-1 rounded text-black dark:text-white bg-white dark:bg-gray-800"
+                        placeholder="value"
+                      />
+                    </td>
+                    <td className="border px-2 py-1">
+                      {queryParams.length > 1 && (
+                        <button
+                          className="text-red-600 hover:text-red-800 text-xs px-1"
+                          onClick={() => handleRemoveQueryParam(idx)}
+                          title="Remove"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <button
+              onClick={handleAddQueryParam}
+              className="bg-gray-200 dark:bg-gray-700 text-xs px-2 py-1 rounded"
+              type="button"
+            >
+              + Add Param
+            </button>
+            <div className="mt-1 text-xs text-gray-500">
+              Final GET URL:{" "}
+              <span className="font-mono">{buildUrlWithQuery()}</span>
+            </div>
+          </div>
+        )}
+
         <label className="font-medium">Headers (JSON)</label>
         <textarea
           value={headers}
