@@ -9,8 +9,8 @@ import CodeSamples from "./components/CodeSamples";
 import SwaggerExplorerView from "./components/SwaggerExplorerView";
 
 export default function App() {
-  // Project/endpoint navigation state
-  const [projectEndpoints, setProjectEndpoints] = useState([]); // {method, path, summary...}
+  // State for projects/endpoints and active endpoint
+  const [projectEndpoints, setProjectEndpoints] = useState([]); // array of {method, path, summary...}
   const [activeEndpointIdx, setActiveEndpointIdx] = useState(0);
 
   // Single endpoint doc state
@@ -30,13 +30,9 @@ export default function App() {
   const [showNotesPreview, setShowNotesPreview] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [mode, setMode] = useState("analyzer"); // or "manual"
-
-  // Versioning
   const [versions, setVersions] = useState([]);
-  // Auth
   const [authType, setAuthType] = useState("");
   const [authValue, setAuthValue] = useState("");
-  // Explorer
   const [explorerView, setExplorerView] = useState(false);
 
   // ---- Import Collection ----
@@ -56,7 +52,6 @@ export default function App() {
               method: method.toUpperCase(),
               path,
               summary: info.summary || "",
-              // TODO: extract details
             });
           }
         }
@@ -67,7 +62,6 @@ export default function App() {
             method: item.request.method,
             path: item.request.url?.raw || "",
             summary: item.name,
-            // TODO: extract details
           });
         });
       }
@@ -78,7 +72,6 @@ export default function App() {
       setToast("Failed to parse OpenAPI/Postman file");
     }
   };
-
   // ---- End Import ----
 
   // Load endpoint details when active changes
@@ -91,7 +84,6 @@ export default function App() {
         path: ep.path,
         meta: { ...prev.meta, title: ep.summary },
       }));
-      // Optionally set params/response here
     }
     // eslint-disable-next-line
   }, [activeEndpointIdx, projectEndpoints]);
@@ -145,8 +137,93 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 font-sans">
+      {/* App header/toolbar (always visible) */}
+      <header className="w-full flex flex-wrap items-center justify-between mb-6 px-2 py-4 bg-white/80 dark:bg-gray-900/80 shadow rounded-xl">
+        <div className="flex items-center gap-4">
+          <span className="text-xl font-bold text-indigo-700 dark:text-indigo-300 tracking-tight">
+            API Doc Builder
+          </span>
+          <label className="bg-blue-600 text-white px-3 py-2 rounded cursor-pointer font-semibold ml-2">
+            Import OpenAPI / Postman
+            <input type="file" accept=".json,.yaml,.yml" hidden onChange={handleImportCollection} />
+          </label>
+          <button
+            className="ml-3 px-3 py-2 rounded bg-gray-600 text-white font-semibold"
+            onClick={() => setExplorerView((v) => !v)}
+          >
+            {explorerView ? "Editor View" : "Explorer View"}
+          </button>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="font-semibold">Auth:</span>
+          <select
+            className="border rounded px-2 py-1 bg-white dark:bg-gray-800"
+            value={authType}
+            onChange={e => {
+              setAuthType(e.target.value);
+              setAuthValue("");
+            }}
+          >
+            <option value="">None</option>
+            <option value="bearer">Bearer Token</option>
+            <option value="apikey-header">API Key (Header)</option>
+            <option value="apikey-query">API Key (Query)</option>
+            <option value="basic">Basic Auth</option>
+          </select>
+          {(authType === "bearer" || authType === "apikey-header" || authType === "apikey-query" || authType === "basic") && (
+            <input
+              className="border rounded px-2 py-1 w-32"
+              value={authValue}
+              onChange={e => setAuthValue(e.target.value)}
+              placeholder={
+                authType === "bearer" ? "Token..." :
+                authType === "apikey-header" ? "X-API-KEY..." :
+                authType === "apikey-query" ? "api_key=..." : "user:pass"
+              }
+            />
+          )}
+          {/* Export Dropdown */}
+          <div className="relative" id="exportDropdown">
+            <button
+              className="ml-4 bg-indigo-600 text-white px-3 py-2 rounded"
+              onClick={() => setExportOpen((v) => !v)}
+            >
+              Export Documentation ▼
+            </button>
+            {exportOpen && (
+              <div className="absolute mt-1 bg-white dark:bg-gray-800 border rounded shadow-lg z-10 min-w-[180px]">
+                <button
+                  onClick={() => { handleExportPDF(); setExportOpen(false); }}
+                  className="block w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  PDF
+                </button>
+                <button
+                  onClick={() => { handleExportMarkdown(); setExportOpen(false); }}
+                  className="block w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  Markdown
+                </button>
+                <button
+                  onClick={() => { handleExportHTML(); setExportOpen(false); }}
+                  className="block w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  HTML
+                </button>
+                <button
+                  onClick={() => { handleExportOpenAPI(); setExportOpen(false); }}
+                  className="block w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  OpenAPI
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
       <div className="max-w-7xl mx-auto py-8 px-2 flex">
-        {/* Sidebar (if projectEndpoints) */}
+        {/* Sidebar (only if endpoints imported) */}
         {projectEndpoints.length > 0 && (
           <div className="w-64 mr-8">
             <label className="block font-bold mb-2 text-xs">Endpoints</label>
@@ -164,96 +241,51 @@ export default function App() {
                 </li>
               ))}
             </ul>
-            <label className="mt-8 block">
-              <span className="text-xs">Import OpenAPI or Postman:</span>
-              <input
-                type="file"
-                accept=".json,.yaml,.yml"
-                className="block mt-1"
-                onChange={handleImportCollection}
-              />
-            </label>
           </div>
         )}
 
         {/* Main panel */}
         <div className="flex-1">
-          <div className="flex flex-wrap items-center gap-2 mb-4">
-            <button
-              onClick={handleSaveVersion}
-              className="bg-green-600 text-white px-3 py-1 rounded font-semibold"
-            >
-              Save Version
-            </button>
-            {versions.length > 0 && (
-              <div className="ml-2">
-                <span className="text-xs font-bold text-gray-500 mr-2">Versions:</span>
-                {versions.map((ver, i) => (
-                  <button
-                    key={i}
-                    className="bg-gray-200 dark:bg-gray-700 rounded px-2 py-1 text-xs mx-1"
-                    onClick={() => handleRestoreVersion(ver)}
-                  >
-                    {ver.name}
-                  </button>
-                ))}
-              </div>
-            )}
-            <div className="ml-auto flex items-center gap-2">
-              <span className="font-semibold">Auth:</span>
-              <select
-                className="border rounded px-2 py-1 bg-white dark:bg-gray-800"
-                value={authType}
-                onChange={e => {
-                  setAuthType(e.target.value);
-                  setAuthValue("");
-                }}
-              >
-                <option value="">None</option>
-                <option value="bearer">Bearer Token</option>
-                <option value="apikey-header">API Key (Header)</option>
-                <option value="apikey-query">API Key (Query)</option>
-                <option value="basic">Basic Auth</option>
-              </select>
-              {(authType === "bearer" || authType === "apikey-header" || authType === "apikey-query" || authType === "basic") && (
-                <input
-                  className="border rounded px-2 py-1 w-32"
-                  value={authValue}
-                  onChange={e => setAuthValue(e.target.value)}
-                  placeholder={
-                    authType === "bearer" ? "Token..." :
-                    authType === "apikey-header" ? "X-API-KEY..." :
-                    authType === "apikey-query" ? "api_key=..." : "user:pass"
-                  }
-                />
-              )}
-              <button
-                className="ml-4 bg-gray-600 text-white px-3 py-2 rounded"
-                onClick={() => setExplorerView(v => !v)}
-              >
-                {explorerView ? "Editor View" : "Explorer View"}
-              </button>
-            </div>
-          </div>
-
           {explorerView ? (
             <SwaggerExplorerView endpoints={projectEndpoints.length ? projectEndpoints : [{...data, ...data.meta, requestParams, responseParams}]} />
           ) : (
           <>
-            {/* Mode Switch */}
-            <div className="mb-6 flex gap-4">
+            {/* Mode Switch & Versioning */}
+            <div className="flex flex-wrap items-center gap-4 mb-6">
               <button
-                className={`px-4 py-2 rounded font-semibold ${mode === "analyzer" ? "bg-indigo-600 text-white" : "bg-gray-200 dark:bg-gray-700"}`}
-                onClick={() => setMode("analyzer")}
+                onClick={handleSaveVersion}
+                className="bg-green-600 text-white px-3 py-1 rounded font-semibold"
               >
-                Auto Analyzer
+                Save Version
               </button>
-              <button
-                className={`px-4 py-2 rounded font-semibold ${mode === "manual" ? "bg-indigo-600 text-white" : "bg-gray-200 dark:bg-gray-700"}`}
-                onClick={() => setMode("manual")}
-              >
-                Manual Entry
-              </button>
+              {versions.length > 0 && (
+                <div className="ml-2">
+                  <span className="text-xs font-bold text-gray-500 mr-2">Versions:</span>
+                  {versions.map((ver, i) => (
+                    <button
+                      key={i}
+                      className="bg-gray-200 dark:bg-gray-700 rounded px-2 py-1 text-xs mx-1"
+                      onClick={() => handleRestoreVersion(ver)}
+                    >
+                      {ver.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <div className="ml-auto flex gap-2">
+                <button
+                  className={`px-4 py-2 rounded font-semibold ${mode === "analyzer" ? "bg-indigo-600 text-white" : "bg-gray-200 dark:bg-gray-700"}`}
+                  onClick={() => setMode("analyzer")}
+                >
+                  Auto Analyzer
+                </button>
+                <button
+                  className={`px-4 py-2 rounded font-semibold ${mode === "manual" ? "bg-indigo-600 text-white" : "bg-gray-200 dark:bg-gray-700"}`}
+                  onClick={() => setMode("manual")}
+                >
+                  Manual Entry
+                </button>
+              </div>
             </div>
             {/* Main Editor */}
             <div className="grid md:grid-cols-2 gap-10">
@@ -343,57 +375,7 @@ export default function App() {
                 <h2 className="font-semibold text-xl mb-4 text-indigo-700 dark:text-indigo-300">
                   API Documentation Preview
                 </h2>
-                {/* Export dropdown */}
-                <div className="relative mb-4" id="exportDropdown">
-                  <button
-                    className="bg-indigo-600 text-white px-3 py-2 rounded font-semibold"
-                    onClick={() => setExportOpen((v) => !v)}
-                  >
-                    Export Documentation ▼
-                  </button>
-                  {exportOpen && (
-                    <div className="absolute mt-1 bg-white dark:bg-gray-800 border rounded shadow-lg z-10 min-w-[180px]">
-                      <button
-                        onClick={() => {
-                          handleExportPDF();
-                          setExportOpen(false);
-                        }}
-                        className="block w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700"
-                      >
-                        PDF
-                      </button>
-                      <button
-                        onClick={() => {
-                          handleExportMarkdown();
-                          setExportOpen(false);
-                        }}
-                        className="block w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700"
-                      >
-                        Markdown
-                      </button>
-                      <button
-                        onClick={() => {
-                          handleExportHTML();
-                          setExportOpen(false);
-                        }}
-                        className="block w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700"
-                      >
-                        HTML
-                      </button>
-                      <button
-                        onClick={() => {
-                          handleExportOpenAPI();
-                          setExportOpen(false);
-                        }}
-                        className="block w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700"
-                      >
-                        OpenAPI
-                      </button>
-                    </div>
-                  )}
-                </div>
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 space-y-4">
-                  {/* LIVE PREVIEW */}
                   <h3 className="text-lg font-bold">
                     {data.meta?.title || "API Name"}
                   </h3>
@@ -402,14 +384,12 @@ export default function App() {
                       "Enter your endpoint above or use Auto Analyzer."}
                   </p>
                   <div>
-                    <div>
-                      <span className="font-mono font-semibold bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
-                        {data.method}
-                      </span>{" "}
-                      <span className="font-mono text-sm break-all">
-                        {actualEndpoint}
-                      </span>
-                    </div>
+                    <span className="font-mono font-semibold bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
+                      {data.method}
+                    </span>{" "}
+                    <span className="font-mono text-sm break-all">
+                      {actualEndpoint}
+                    </span>
                   </div>
                   <ParamsTable
                     title="Request Parameters"
