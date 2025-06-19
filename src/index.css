@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Optional custom tweaks for API Doc Builder UI */
+body {
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+}
