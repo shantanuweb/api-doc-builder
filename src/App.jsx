@@ -119,24 +119,21 @@ export default function App() {
               />
             )}
 
-            <h2 className="font-semibold text-lg mb-2 text-indigo-700 dark:text-indigo-300 mt-8">
-              Request Parameters
-            </h2>
+            {/* Editable Params Tables */}
             <ParamsTable
-              title=""
+              title="Request Parameters"
               params={requestParams}
               setParams={setRequestParams}
               hasRequired={true}
+              editable={true}
             />
 
-            <h2 className="font-semibold text-lg mb-2 text-indigo-700 dark:text-indigo-300 mt-8">
-              Response Parameters
-            </h2>
             <ParamsTable
-              title=""
+              title="Response Parameters"
               params={responseParams}
               setParams={setResponseParams}
               hasRequired={false}
+              editable={true}
             />
 
             {/* Integration notes */}
@@ -245,64 +242,30 @@ export default function App() {
                   </span>
                 </div>
               </div>
-              {/* Preview Params */}
-              {requestParams.length > 0 && (
-                <>
-                  <h4 className="font-semibold mt-4">Request Params</h4>
-                  <table className="w-full border text-xs">
-                    <thead>
-                      <tr>
-                        <th className="border px-2 py-1">Name</th>
-                        <th className="border px-2 py-1">Type</th>
-                        <th className="border px-2 py-1">Required</th>
-                        <th className="border px-2 py-1">Description</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {requestParams.map((p, i) => (
-                        <tr key={i}>
-                          <td className="border px-2 py-1">{p.name}</td>
-                          <td className="border px-2 py-1">{p.type}</td>
-                          <td className="border px-2 py-1 text-center">
-                            {p.required ? "Yes" : "No"}
-                          </td>
-                          <td className="border px-2 py-1">{p.description}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </>
-              )}
-              {responseParams.length > 0 && (
-                <>
-                  <h4 className="font-semibold mt-4">Response Params</h4>
-                  <table className="w-full border text-xs">
-                    <thead>
-                      <tr>
-                        <th className="border px-2 py-1">Name</th>
-                        <th className="border px-2 py-1">Type</th>
-                        <th className="border px-2 py-1">Description</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {responseParams.map((p, i) => (
-                        <tr key={i}>
-                          <td className="border px-2 py-1">{p.name}</td>
-                          <td className="border px-2 py-1">{p.type}</td>
-                          <td className="border px-2 py-1">{p.description}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </>
-              )}
+              {/* Polished Preview Tables (read-only mode) */}
+              <ParamsTable
+                title="Request Parameters"
+                params={requestParams}
+                hasRequired={true}
+                editable={false}
+              />
+              <ParamsTable
+                title="Response Parameters"
+                params={responseParams}
+                hasRequired={false}
+                editable={false}
+              />
               {/* Integration Notes Preview */}
               {data.integrationNotes && (
                 <div>
                   <h4 className="font-semibold mt-4">Integration Notes</h4>
-                  <pre className="bg-gray-100 dark:bg-gray-900 p-2 rounded text-xs whitespace-pre-wrap">
-                    {data.integrationNotes}
-                  </pre>
+                  <div className="prose prose-sm dark:prose-invert bg-gray-100 dark:bg-gray-900 p-2 rounded">
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: marked.parse(data.integrationNotes || ""),
+                      }}
+                    />
+                  </div>
                 </div>
               )}
             </div>
