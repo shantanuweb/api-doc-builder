@@ -57,7 +57,8 @@ export default function TryItLive({
       const res = await fetch(liveEndpoint, {
         method,
         headers,
-        body: method === "GET" ? undefined : JSON.stringify(reqInput),
+        body: method === "GET" ? undefined :
+          bodyType === "form" ? new URLSearchParams(reqInput).toString() : JSON.stringify(reqInput),
       });
       let responseText = await res.text();
       setLiveResponse(responseText);
