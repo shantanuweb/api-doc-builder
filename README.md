@@ -36,3 +36,8 @@ A modern, open-source web app to **generate, preview, and export API documentati
    git clone https://github.com/shantanuweb/api-doc-builder.git
    cd api-doc-builder
    npm install
+   ```
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
