@@ -16,7 +16,7 @@ export default function AutoAnalyzer({
   const [headers, setHeaders] = useState(
     JSON.stringify(incomingHeaders, null, 2)
   );
-  const [bodyJson, setBodyJson] = useState("");
+  const [bodyFields, setBodyFields] = useState([{ name: "", value: "" }]);
   const [queryParams, setQueryParams] = useState([{ name: "", value: "" }]);
   const [pathParams, setPathParams] = useState({});
   const [error, setError] = useState(null);
@@ -86,21 +86,17 @@ export default function AutoAnalyzer({
     // POST/PUT/PATCH: handle request body and params
     if (["POST", "PUT", "PATCH"].includes(method)) {
       parsedHeaders["Content-Type"] = "application/json";
-        let bodyObj;
-        try {
-          bodyObj = bodyJson ? JSON.parse(bodyJson) : null;
-        } catch (e) {
-          setError({ message: "Body is not valid JSON." });
-          setIsLoading(false);
-          return;
-        }
-        if (!bodyObj || Object.keys(bodyObj).length === 0) {
-          setError({ message: "Please provide a non-empty JSON body." });
-          setIsLoading(false);
-          return;
-        }
-        setRequestParams(flattenSchema(bodyObj));
+      const bodyObj = {};
+      bodyFields.forEach((p) => {
+        if (p.name.trim() !== "") bodyObj[p.name] = p.value;
+      });
+      if (Object.keys(bodyObj).length === 0) {
+        setError({ message: "Please provide at least one body field." });
+        setIsLoading(false);
+        return;
       }
+      setRequestParams(flattenSchema(bodyObj));
+    }
 
     // GET: handle request params from query
     if (method === "GET") {
@@ -124,7 +120,11 @@ export default function AutoAnalyzer({
     // Compose body for fetch
     let fetchBody = undefined;
     if (["POST", "PUT", "PATCH"].includes(method)) {
-      fetchBody = bodyJson;
+      const bodyObj = {};
+      bodyFields.forEach((p) => {
+        if (p.name.trim() !== "") bodyObj[p.name] = p.value;
+      });
+      fetchBody = JSON.stringify(bodyObj);
     }
 
     try {
@@ -201,6 +201,19 @@ export default function AutoAnalyzer({
   };
   const handleRemoveQueryParam = (idx) => {
     setQueryParams((params) => params.filter((_, i) => i !== idx));
+  };
+
+  // Body fields table handlers
+  const handleBodyFieldChange = (idx, field, value) => {
+    setBodyFields((fields) =>
+      fields.map((f, i) => (i === idx ? { ...f, [field]: value } : f))
+    );
+  };
+  const handleAddBodyField = () => {
+    setBodyFields((fields) => [...fields, { name: "", value: "" }]);
+  };
+  const handleRemoveBodyField = (idx) => {
+    setBodyFields((fields) => fields.filter((_, i) => i !== idx));
   };
 
 
@@ -341,17 +354,62 @@ export default function AutoAnalyzer({
         />
 
         {(method === "POST" || method === "PUT" || method === "PATCH") && (
-          <>
-            <label htmlFor="auto-body" className="font-medium">Body (JSON)</label>
-            <textarea
-              id="auto-body"
-              value={bodyJson}
-              onChange={(e) => setBodyJson(e.target.value)}
-              className="border px-2 py-1 rounded font-mono text-black dark:text-white bg-white dark:bg-gray-800"
-              rows={3}
-              placeholder='{"key":"value"}'
-            />
-          </>
+          <div className="mb-2">
+            <label className="font-medium">Request Body</label>
+            <table className="w-full border mb-2 text-xs mt-1">
+              <thead>
+                <tr>
+                  <th className="border px-2 py-1">Field</th>
+                  <th className="border px-2 py-1">Value</th>
+                  <th className="border px-2 py-1"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {bodyFields.map((field, idx) => (
+                  <tr key={idx}>
+                    <td className="border px-2 py-1">
+                      <input
+                        aria-label="Body field name"
+                        type="text"
+                        value={field.name}
+                        onChange={(e) => handleBodyFieldChange(idx, "name", e.target.value)}
+                        className="w-full border px-1 py-1 rounded text-black dark:text-white bg-white dark:bg-gray-800"
+                        placeholder="key"
+                      />
+                    </td>
+                    <td className="border px-2 py-1">
+                      <input
+                        aria-label="Body field value"
+                        type="text"
+                        value={field.value}
+                        onChange={(e) => handleBodyFieldChange(idx, "value", e.target.value)}
+                        className="w-full border px-1 py-1 rounded text-black dark:text-white bg-white dark:bg-gray-800"
+                        placeholder="value"
+                      />
+                    </td>
+                    <td className="border px-2 py-1">
+                      {bodyFields.length > 1 && (
+                        <button
+                          className="text-red-600 hover:text-red-800 text-xs px-1"
+                          onClick={() => handleRemoveBodyField(idx)}
+                          title="Remove"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <button
+              onClick={handleAddBodyField}
+              className="bg-gray-200 dark:bg-gray-700 text-xs px-2 py-1 rounded"
+              type="button"
+            >
+              + Add Field
+            </button>
+          </div>
         )}
 
         <button
