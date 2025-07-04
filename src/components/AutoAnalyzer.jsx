@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import flattenSchema from "../utils/flattenSchema";
+import Spinner from "./Spinner";
 
 export default function AutoAnalyzer({
   setData,
@@ -18,6 +19,7 @@ export default function AutoAnalyzer({
   const [pathParams, setPathParams] = useState({});
   const [error, setError] = useState("");
   const [apiResponse, setApiResponse] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Update local endpoint and headers when incoming props change
   useEffect(() => {
@@ -29,10 +31,6 @@ export default function AutoAnalyzer({
   useEffect(() => {
     setHeaders(incomingHeadersStr);
   }, [incomingHeadersStr]);
-=======
-  useEffect(() => {
-    setHeaders(JSON.stringify(incomingHeaders, null, 2));
-  }, [incomingHeaders]);
 
   // Compose endpoint with path params
   const endpointWithPathParams = endpoint.replace(/\{(\w+)\}/g, (_, k) => pathParams[k] || `{${k}}`);
@@ -54,6 +52,7 @@ export default function AutoAnalyzer({
   };
 
   const handleAnalyze = async () => {
+    setIsLoading(true);
     setError("");
     setApiResponse(null);
     let parsedHeaders = {};
@@ -61,6 +60,7 @@ export default function AutoAnalyzer({
       parsedHeaders = headers ? JSON.parse(headers) : {};
     } catch (e) {
       setError("Headers must be valid JSON.");
+      setIsLoading(false);
       return;
     }
 
@@ -84,19 +84,21 @@ export default function AutoAnalyzer({
     // POST/PUT/PATCH: handle request body and params
     if (["POST", "PUT", "PATCH"].includes(method)) {
       parsedHeaders["Content-Type"] = "application/json";
-      let bodyObj;
-      try {
-        bodyObj = bodyJson ? JSON.parse(bodyJson) : null;
-      } catch (e) {
-        setError("Body is not valid JSON.");
-        return;
+        let bodyObj;
+        try {
+          bodyObj = bodyJson ? JSON.parse(bodyJson) : null;
+        } catch (e) {
+          setError("Body is not valid JSON.");
+          setIsLoading(false);
+          return;
+        }
+        if (!bodyObj || Object.keys(bodyObj).length === 0) {
+          setError("Please provide a non-empty JSON body.");
+          setIsLoading(false);
+          return;
+        }
+        setRequestParams(flattenSchema(bodyObj));
       }
-      if (!bodyObj || Object.keys(bodyObj).length === 0) {
-        setError("Please provide a non-empty JSON body.");
-        return;
-      }
-      setRequestParams(flattenSchema(bodyObj));
-    }
 
     // GET: handle request params from query
     if (method === "GET") {
@@ -165,16 +167,19 @@ export default function AutoAnalyzer({
         headers: parsedHeaders,
         requestBody: fetchBody,
         response: json,
-      }));
-    } catch (err) {
-      setError(
-        (err.message ? err.message + "\n\n" : "") +
-        "Cannot fetch! This may be due to:\n" +
-          "• API endpoint is wrong\n" +
-          "• JSON in headers or body is invalid\n" +
-          "• CORS (the API blocks browser access)\n\n" +
-          "Try Manual Entry mode if you are stuck, or use a mock API endpoint."
-      );
+        }));
+      } catch (err) {
+        setError(
+          (err.message ? err.message + "\n\n" : "") +
+            "Cannot fetch! This may be due to:\n" +
+              "• API endpoint is wrong\n" +
+              "• JSON in headers or body is invalid\n" +
+              "• CORS (the API blocks browser access)\n\n" +
+              "Try Manual Entry mode if you are stuck, or use a mock API endpoint."
+        );
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -343,6 +348,7 @@ export default function AutoAnalyzer({
         >
           Submit &amp; Generate
         </button>
+        {isLoading && <Spinner className="ml-2" />}
         {error && (
           <div className="text-red-600 mt-2 whitespace-pre-line">
             {error}
