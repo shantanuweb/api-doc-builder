@@ -276,6 +276,12 @@ export default function App() {
             {/* Main Editor */}
             <div className="grid md:grid-cols-2 gap-10">
               <div className="md:border-r md:pr-8">
+                <RequestSettings
+                  authType={authType}
+                  setAuthType={setAuthType}
+                  authValue={authValue}
+                  setAuthValue={setAuthValue}
+                />
                 {mode === "analyzer" ? (
                   <AutoAnalyzer
                     setData={setData}
@@ -308,8 +314,6 @@ export default function App() {
                   hasRequired={false}
                   editable={true}
                 />
-                <RequestSettings authType={authType} setAuthType={setAuthType} authValue={authValue} setAuthValue={setAuthValue} />
-
                 {/* Content-Type and Body Format */}
                 <div className="mb-6">
                   <label className="block font-semibold mb-1">Content-Type:</label>
