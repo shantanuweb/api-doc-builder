@@ -24,10 +24,15 @@ export default function AutoAnalyzer({
     setEndpoint(incomingEndpoint);
   }, [incomingEndpoint]);
 
+
   const incomingHeadersStr = JSON.stringify(incomingHeaders, null, 2);
   useEffect(() => {
     setHeaders(incomingHeadersStr);
   }, [incomingHeadersStr]);
+=======
+  useEffect(() => {
+    setHeaders(JSON.stringify(incomingHeaders, null, 2));
+  }, [incomingHeaders]);
 
   // Compose endpoint with path params
   const endpointWithPathParams = endpoint.replace(/\{(\w+)\}/g, (_, k) => pathParams[k] || `{${k}}`);
@@ -136,10 +141,23 @@ export default function AutoAnalyzer({
 
       setApiResponse(json);
       setResponseParams(flattenSchema(json));
+      let baseUrl = endpointWithPathParams;
+      let path = "";
+      try {
+        const urlObj = new URL(endpointWithPathParams);
+        baseUrl = urlObj.origin;
+        path = urlObj.pathname;
+      } catch {
+        const m = endpointWithPathParams.match(/(https?:\/\/[^/]+)(\/.*)/);
+        if (m) {
+          baseUrl = m[1];
+          path = m[2];
+        }
+      }
       setData((d) => ({
         ...d,
-        baseUrl: endpointWithPathParams.replace(/\/[\w\-]+$/, ""),
-        path: endpointWithPathParams.match(/\/[\w\-]+$/)?.[0] || "",
+        baseUrl,
+        path,
         method,
         headers: parsedHeaders,
         requestBody: fetchBody,

@@ -281,6 +281,7 @@ export default function App() {
                   setAuthType={setAuthType}
                   authValue={authValue}
                   setAuthValue={setAuthValue}
+ ea3f74-codex/move-request-setting-up-on-page
                   contentType={data.headers["Content-Type"] || ""}
                   setContentType={(val) =>
                     setData((d) => ({
@@ -288,6 +289,7 @@ export default function App() {
                       headers: { ...d.headers, "Content-Type": val },
                     }))
                   }
+ main
                 />
                 {mode === "analyzer" ? (
                   <AutoAnalyzer
@@ -321,7 +323,9 @@ export default function App() {
                   hasRequired={false}
                   editable={true}
                 />
+
                 {/* Request Body */}
+                {/* Content-Type and Body Format */}
                 <div className="mb-6">
                   {data.method !== "GET" && (
                     <textarea
