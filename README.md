@@ -55,16 +55,6 @@ npm install
    ```bash
    npm run preview
    ```
-   git clone https://github.com/shantanuweb/api-doc-builder.git
-   cd api-doc-builder
-   npm install
-   ```
-
-2. **Start the dev server:**
-
-   ```bash
-   npm run dev
-   ```
 
 ## License
 
