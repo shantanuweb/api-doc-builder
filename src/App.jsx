@@ -9,6 +9,7 @@ import Toast from "./components/Toast";
 import TryItLive from "./components/TryItLive";
 import CodeSamples from "./components/CodeSamples";
 import SwaggerExplorerView from "./components/SwaggerExplorerView";
+import RequestSettings from "./components/RequestSettings";
 
 export default function App() {
   // State for projects/endpoints and active endpoint
@@ -250,13 +251,7 @@ export default function App() {
         >
           {isDark ? 'Light' : 'Dark'} Mode
         </button>
-      </div>
-    </header>
-                </button>
-              </div>
-            )}
-          </div>
-      </header>
+     </header>
 
       <div className="max-w-7xl mx-auto py-8 px-2 flex">
         {/* Sidebar (only if endpoints imported) */}
