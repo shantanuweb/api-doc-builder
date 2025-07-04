@@ -281,6 +281,15 @@ export default function App() {
                   setAuthType={setAuthType}
                   authValue={authValue}
                   setAuthValue={setAuthValue}
+ ea3f74-codex/move-request-setting-up-on-page
+                  contentType={data.headers["Content-Type"] || ""}
+                  setContentType={(val) =>
+                    setData((d) => ({
+                      ...d,
+                      headers: { ...d.headers, "Content-Type": val },
+                    }))
+                  }
+ main
                 />
                 {mode === "analyzer" ? (
                   <AutoAnalyzer
@@ -314,23 +323,10 @@ export default function App() {
                   hasRequired={false}
                   editable={true}
                 />
+
+                {/* Request Body */}
                 {/* Content-Type and Body Format */}
                 <div className="mb-6">
-                  <label className="block font-semibold mb-1">Content-Type:</label>
-                  <select
-                    className="border rounded px-2 py-1 bg-white dark:bg-gray-800 mb-2"
-                    value={data.headers["Content-Type"] || ""}
-                    onChange={e =>
-                      setData(d => ({
-                        ...d,
-                        headers: { ...d.headers, "Content-Type": e.target.value }
-                      }))
-                    }
-                  >
-                    <option value="application/json">application/json</option>
-                    <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
-                    <option value="text/plain">text/plain</option>
-                  </select>
                   {data.method !== "GET" && (
                     <textarea
                       className="w-full border px-2 py-2 rounded resize-y text-black dark:text-white bg-white dark:bg-gray-800"

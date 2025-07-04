@@ -24,6 +24,12 @@ export default function AutoAnalyzer({
     setEndpoint(incomingEndpoint);
   }, [incomingEndpoint]);
 
+
+  const incomingHeadersStr = JSON.stringify(incomingHeaders, null, 2);
+  useEffect(() => {
+    setHeaders(incomingHeadersStr);
+  }, [incomingHeadersStr]);
+=======
   useEffect(() => {
     setHeaders(JSON.stringify(incomingHeaders, null, 2));
   }, [incomingHeaders]);
