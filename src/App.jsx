@@ -9,12 +9,12 @@ import Toast from "./components/Toast";
 import TryItLive from "./components/TryItLive";
 import CodeSamples from "./components/CodeSamples";
 import SwaggerExplorerView from "./components/SwaggerExplorerView";
-import RequestSettings from "./components/RequestSettings";
 
 export default function App() {
   // State for projects/endpoints and active endpoint
   const [projectEndpoints, setProjectEndpoints] = useState([]);
   const [activeEndpointIdx, setActiveEndpointIdx] = useState(0);
+  const [endpointQuery, setEndpointQuery] = useState("");
 
   // Single endpoint doc state
   const [data, setData] = useState({
@@ -176,6 +176,17 @@ export default function App() {
     }
   };
 
+  const filteredEndpoints = projectEndpoints
+    .map((ep, index) => ({ ...ep, index }))
+    .filter(({ path, method, summary }) => {
+      const q = endpointQuery.toLowerCase();
+      return (
+        path.toLowerCase().includes(q) ||
+        method.toLowerCase().includes(q) ||
+        (summary && summary.toLowerCase().includes(q))
+      );
+    });
+
   // ---- UI Render ----
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 font-sans">
@@ -252,12 +263,19 @@ export default function App() {
         {projectEndpoints.length > 0 && (
           <div className="w-64 mr-8">
             <label className="block font-bold mb-2 text-xs">Endpoints</label>
+            <input
+              type="text"
+              placeholder="Search endpoints..."
+              value={endpointQuery}
+              onChange={(e) => setEndpointQuery(e.target.value)}
+              className="w-full mb-2 px-2 py-1 border rounded text-sm bg-white dark:bg-gray-700 text-black dark:text-white"
+            />
             <ul>
-              {projectEndpoints.map((ep, i) => (
-                <li key={`${ep.method}-${ep.path}-${i}`}>
+              {filteredEndpoints.map((ep) => (
+                <li key={`${ep.method}-${ep.path}-${ep.index}`}>
                   <button
-                    className={`w-full text-left px-2 py-1 rounded ${activeEndpointIdx === i ? 'bg-indigo-100 dark:bg-indigo-900' : ''}`}
-                    onClick={() => setActiveEndpointIdx(i)}
+                    className={`w-full text-left px-2 py-1 rounded ${activeEndpointIdx === ep.index ? 'bg-indigo-100 dark:bg-indigo-900' : ''}`}
+                    onClick={() => setActiveEndpointIdx(ep.index)}
                   >
                     <span className="font-mono font-semibold">{ep.method}</span>
                     <span className="ml-2">{ep.path}</span>
@@ -320,7 +338,6 @@ export default function App() {
                   setAuthType={setAuthType}
                   authValue={authValue}
                   setAuthValue={setAuthValue}
- ea3f74-codex/move-request-setting-up-on-page
                   contentType={data.headers["Content-Type"] || ""}
                   setContentType={(val) =>
                     setData((d) => ({
@@ -328,7 +345,6 @@ export default function App() {
                       headers: { ...d.headers, "Content-Type": val },
                     }))
                   }
- main
                 />
                 {mode === "analyzer" ? (
                   <AutoAnalyzer
@@ -337,6 +353,17 @@ export default function App() {
                     setResponseParams={setResponseParams}
                     headers={actualHeaders}
                     endpoint={actualEndpoint}
+                    authType={authType}
+                    setAuthType={setAuthType}
+                    authValue={authValue}
+                    setAuthValue={setAuthValue}
+                    contentType={data.headers["Content-Type"] || ""}
+                    setContentType={(val) =>
+                      setData((d) => ({
+                        ...d,
+                        headers: { ...d.headers, "Content-Type": val },
+                      }))
+                    }
                   />
                 ) : (
                   <ManualDocEditor
@@ -346,6 +373,17 @@ export default function App() {
                     setRequestParams={setRequestParams}
                     responseParams={responseParams}
                     setResponseParams={setResponseParams}
+                    authType={authType}
+                    setAuthType={setAuthType}
+                    authValue={authValue}
+                    setAuthValue={setAuthValue}
+                    contentType={data.headers["Content-Type"] || ""}
+                    setContentType={(val) =>
+                      setData((d) => ({
+                        ...d,
+                        headers: { ...d.headers, "Content-Type": val },
+                      }))
+                    }
                   />
                 )}
                 <ParamsTable
