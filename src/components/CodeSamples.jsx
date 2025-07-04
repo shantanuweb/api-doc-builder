@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-function makeCode({ endpoint, method, headers, params, body, authType, authValue }) {
+function makeCode({ endpoint, method, headers, params, body }) {
   const contentType = (headers && headers["Content-Type"]) || "";
   let headerLines = Object.entries(headers || {})
     .map(([k, v]) => `-H "${k}: ${v}"`)
@@ -73,10 +73,10 @@ const LANGUAGES = [
   { key: "python", label: "Python" },
 ];
 
-export default function CodeSamples({ endpoint, method, headers, params, body, authType, authValue }) {
+export default function CodeSamples({ endpoint, method, headers, params, body }) {
   const [lang, setLang] = useState("curl");
 
-  const codes = makeCode({ endpoint, method, headers, params, body, authType, authValue });
+  const codes = makeCode({ endpoint, method, headers, params, body });
 
   function handleCopy() {
     navigator.clipboard.writeText(codes[lang]);
