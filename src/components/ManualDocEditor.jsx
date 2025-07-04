@@ -44,11 +44,18 @@ export default function ManualDocEditor({
 
   // Sync baseUrl, path and method to data
   useEffect(() => {
-    let pathMatch = endpoint.match(/(https?:\/\/[^/]+)(\/.*)/);
-    let baseUrl = endpoint, path = "";
-    if (pathMatch) {
-      baseUrl = pathMatch[1];
-      path = pathMatch[2];
+    let baseUrl = endpoint;
+    let path = "";
+    try {
+      const urlObj = new URL(endpoint);
+      baseUrl = urlObj.origin;
+      path = urlObj.pathname;
+    } catch {
+      const m = endpoint.match(/(https?:\/\/[^/]+)(\/.*)/);
+      if (m) {
+        baseUrl = m[1];
+        path = m[2];
+      }
     }
     setData((d) => ({
       ...d,
