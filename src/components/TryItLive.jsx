@@ -37,7 +37,26 @@ export default function TryItLive({
 
   // Compose endpoint with path/query
   let liveEndpoint = endpoint;
-  // TODO: interpolate path/query params if desired
+  const pathKeys = (endpoint.match(/\{(\w+)\}/g) || []).map((m) =>
+    m.replace(/[{}]/g, "")
+  );
+  liveEndpoint = liveEndpoint.replace(/\{(\w+)\}/g, (_, k) =>
+    reqInput[k] !== undefined ? encodeURIComponent(reqInput[k]) : `{${k}}`
+  );
+
+  if (method === "GET") {
+    const queryPairs = requestParams
+      .filter((p) => !pathKeys.includes(p.name))
+      .map((p) => [p.name, reqInput[p.name]])
+      .filter(([, v]) => v !== undefined && v !== "");
+
+    if (queryPairs.length) {
+      const qs = queryPairs
+        .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+        .join("&");
+      liveEndpoint += (liveEndpoint.includes("?") ? "&" : "?") + qs;
+    }
+  }
 
   const handleSend = async () => {
     setIsLoading(true);
