@@ -348,17 +348,6 @@ export default function App() {
                     setResponseParams={setResponseParams}
                     headers={actualHeaders}
                     endpoint={actualEndpoint}
-                    authType={authType}
-                    setAuthType={setAuthType}
-                    authValue={authValue}
-                    setAuthValue={setAuthValue}
-                    contentType={data.headers["Content-Type"] || ""}
-                    setContentType={(val) =>
-                      setData((d) => ({
-                        ...d,
-                        headers: { ...d.headers, "Content-Type": val },
-                      }))
-                    }
                   />
                 ) : (
                   <ManualDocEditor
@@ -366,19 +355,6 @@ export default function App() {
                     setData={setData}
                     requestParams={requestParams}
                     setRequestParams={setRequestParams}
-                    responseParams={responseParams}
-                    setResponseParams={setResponseParams}
-                    authType={authType}
-                    setAuthType={setAuthType}
-                    authValue={authValue}
-                    setAuthValue={setAuthValue}
-                    contentType={data.headers["Content-Type"] || ""}
-                    setContentType={(val) =>
-                      setData((d) => ({
-                        ...d,
-                        headers: { ...d.headers, "Content-Type": val },
-                      }))
-                    }
                   />
                 )}
                 <ParamsTable

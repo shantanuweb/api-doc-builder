@@ -1,19 +1,12 @@
 import React, { useState, useEffect } from "react";
 import flattenSchema from "../utils/flattenSchema";
 import Spinner from "./Spinner";
-import RequestSettings from "./RequestSettings";
 export default function AutoAnalyzer({
   setData,
   setRequestParams,
   setResponseParams,
   headers: incomingHeaders = { "Content-Type": "application/json" },
   endpoint: incomingEndpoint = "",
-  authType,
-  setAuthType,
-  authValue,
-  setAuthValue,
-  contentType,
-  setContentType,
 }) {
   const [endpoint, setEndpoint] = useState(incomingEndpoint);
   const [method, setMethod] = useState("GET");
@@ -251,16 +244,6 @@ export default function AutoAnalyzer({
         )}
 
         <label htmlFor="auto-method" className="font-medium">Method</label>
-        <RequestSettings
-          authType={authType}
-          setAuthType={setAuthType}
-          authValue={authValue}
-          setAuthValue={setAuthValue}
-          contentType={contentType}
-          setContentType={setContentType}
-        />
-
-        <label className="font-medium">Method</label>
         <select
           id="auto-method"
           value={method}
