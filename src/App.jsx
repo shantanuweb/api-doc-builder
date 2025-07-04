@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { exportPDF, exportMarkdown, exportHTML, exportOpenAPI } from "./utils/exporters";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
 import AutoAnalyzer from "./components/AutoAnalyzer";
@@ -122,10 +123,23 @@ export default function App() {
   }
 
   // ---- Export Handlers ----
-  const handleExportPDF = async () => setToast("Exported as PDF!");
-  const handleExportMarkdown = () => setToast("Exported as Markdown!");
-  const handleExportHTML = () => setToast("Exported as HTML!");
-  const handleExportOpenAPI = () => setToast("Exported as OpenAPI Spec!");
+  const handleExportPDF = async () => {
+    await exportPDF({ data, requestParams, responseParams, integrationNotes: data.integrationNotes });
+    setToast("Exported as PDF!");
+  };
+  const handleExportMarkdown = () => {
+    exportMarkdown({ data, requestParams, responseParams, integrationNotes: data.integrationNotes });
+    setToast("Exported as Markdown!");
+  };
+  const handleExportHTML = () => {
+    const html = document.querySelector('.prose')?.innerHTML || '';
+    exportHTML({ html });
+    setToast("Exported as HTML!");
+  };
+  const handleExportOpenAPI = () => {
+    exportOpenAPI(data);
+    setToast("Exported as OpenAPI Spec!");
+  };
 
   // ---- Export Dropdown UX ----
   useEffect(() => {
@@ -215,7 +229,7 @@ export default function App() {
             <label className="block font-bold mb-2 text-xs">Endpoints</label>
             <ul>
               {projectEndpoints.map((ep, i) => (
-                <li key={i}>
+                <li key={`${ep.method}-${ep.path}-${i}`}>
                   <button
                     className={`w-full text-left px-2 py-1 rounded ${activeEndpointIdx === i ? 'bg-indigo-100 dark:bg-indigo-900' : ''}`}
                     onClick={() => setActiveEndpointIdx(i)}
@@ -249,7 +263,7 @@ export default function App() {
                   <span className="text-xs font-bold text-gray-500 mr-2">Versions:</span>
                   {versions.map((ver, i) => (
                     <button
-                      key={i}
+                      key={`${ver.name}-${ver.timestamp}`}
                       className="bg-gray-200 dark:bg-gray-700 rounded px-2 py-1 text-xs mx-1"
                       onClick={() => handleRestoreVersion(ver)}
                     >

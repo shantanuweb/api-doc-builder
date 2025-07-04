@@ -123,6 +123,9 @@ export default function AutoAnalyzer({
         headers: parsedHeaders,
         body: fetchBody,
       });
+      if (!res.ok) {
+        throw new Error(`Request failed with status ${res.status}`);
+      }
       let responseText = await res.text();
       let json;
       try {
@@ -159,6 +162,7 @@ export default function AutoAnalyzer({
       }));
     } catch (err) {
       setError(
+        (err.message ? err.message + "\n\n" : "") +
         "Cannot fetch! This may be due to:\n" +
           "• API endpoint is wrong\n" +
           "• JSON in headers or body is invalid\n" +

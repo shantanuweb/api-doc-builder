@@ -8,7 +8,7 @@ export default function SwaggerExplorerView({ endpoints }) {
     <div className="bg-white dark:bg-gray-900 p-6 rounded-xl">
       <h2 className="text-2xl font-bold mb-4">API Explorer</h2>
       {endpoints.map((ep, i) => (
-        <details key={i} className="mb-3 border rounded">
+        <details key={`${ep.method}-${ep.path}-${i}`} className="mb-3 border rounded">
           <summary className="font-mono text-indigo-700 dark:text-indigo-300 font-bold px-2 py-1 cursor-pointer">
             {ep.method} {ep.path} <span className="ml-3">{ep.summary || ep.title}</span>
           </summary>

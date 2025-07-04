@@ -38,6 +38,12 @@ A modern, open-source web app to **generate, preview, and export API documentati
    npm install
    ```
 
+2. **Start the dev server:**
+
+   ```bash
+   npm run dev
+   ```
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).

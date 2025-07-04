@@ -29,13 +29,16 @@ export default function ExportDropdown({
         className="bg-indigo-700 text-white px-4 py-2 rounded font-medium hover:bg-indigo-800"
         onClick={() => setOpen((o) => !o)}
         type="button"
+        aria-haspopup="true"
+        aria-expanded={open}
       >
         📤 Export Documentation ▼
       </button>
       {open && (
-        <div className="absolute z-10 bg-white dark:bg-gray-900 shadow rounded mt-1 w-48">
+        <div className="absolute z-10 bg-white dark:bg-gray-900 shadow rounded mt-1 w-48" role="menu">
           <button
             className="block w-full text-left px-4 py-2 hover:bg-indigo-50 dark:hover:bg-gray-800"
+            role="menuitem"
             onClick={() => {
               setOpen(false);
               onMarkdown();
@@ -45,6 +48,7 @@ export default function ExportDropdown({
           </button>
           <button
             className="block w-full text-left px-4 py-2 hover:bg-indigo-50 dark:hover:bg-gray-800"
+            role="menuitem"
             onClick={() => {
               setOpen(false);
               onPDF();
@@ -54,6 +58,7 @@ export default function ExportDropdown({
           </button>
           <button
             className="block w-full text-left px-4 py-2 hover:bg-indigo-50 dark:hover:bg-gray-800"
+            role="menuitem"
             onClick={() => {
               setOpen(false);
               onOpenAPI();
@@ -63,6 +68,7 @@ export default function ExportDropdown({
           </button>
            <button
             className="block w-full text-left px-4 py-2 hover:bg-indigo-50 dark:hover:bg-gray-800"
+            role="menuitem"
             onClick={() => {
               setOpen(false);
               onHTML(); // <-- Call the HTML handler

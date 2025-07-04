@@ -20,7 +20,7 @@ function makeCode({ endpoint, method, headers, params, body, authType, authValue
       curl += ` -d '${encoded}'`;
     } else if (contentType.includes("multipart/form-data")) {
       const formParts = Object.entries(body)
-        .map(([k, v]) => `-F \"${k}=${v}\"`)
+        .map(([k, v]) => `-F "${k}=${v}"`)
         .join(" ");
       curl += ` ${formParts}`;
     } else {

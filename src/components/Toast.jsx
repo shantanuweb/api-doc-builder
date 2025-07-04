@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 
 export default function Toast({ message, onClose }) {
   if (!message) return null;
@@ -11,3 +12,8 @@ export default function Toast({ message, onClose }) {
     </div>
   );
 }
+
+Toast.propTypes = {
+  message: PropTypes.string,
+  onClose: PropTypes.func.isRequired,
+};

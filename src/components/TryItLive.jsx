@@ -120,7 +120,7 @@ export default function TryItLive({
             </thead>
             <tbody>
               {requestParams.map((p, i) => (
-                <tr key={i}>
+                <tr key={`${p.name}-${i}`}>
                   <td className="border px-2 py-1">{p.name}</td>
                   <td className="border px-2 py-1">
                     <input

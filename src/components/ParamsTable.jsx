@@ -193,7 +193,7 @@ export default function ParamsTable({
                         .split(",")
                         .map((val, i) => (
                           <span
-                            key={i}
+                            key={`${val}-${i}`}
                             className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 rounded px-1 mx-0.5 text-xs"
                           >
                             {val.trim()}
