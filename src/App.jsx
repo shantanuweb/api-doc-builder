@@ -320,7 +320,6 @@ export default function App() {
                   setAuthType={setAuthType}
                   authValue={authValue}
                   setAuthValue={setAuthValue}
- ea3f74-codex/move-request-setting-up-on-page
                   contentType={data.headers["Content-Type"] || ""}
                   setContentType={(val) =>
                     setData((d) => ({
@@ -328,7 +327,6 @@ export default function App() {
                       headers: { ...d.headers, "Content-Type": val },
                     }))
                   }
- main
                 />
                 {mode === "analyzer" ? (
                   <AutoAnalyzer
