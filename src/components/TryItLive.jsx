@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import Spinner from "./Spinner";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneLight, oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 // Generate a mock response from documented responseParams (array of {name,type})
 function mockResponseFromParams(params) {
@@ -153,9 +155,15 @@ export default function TryItLive({
       {liveResponse && (
         <div className="mt-4">
           <div className="font-semibold mb-1 text-xs">Response:</div>
-          <pre className="bg-gray-100 dark:bg-gray-800 p-2 rounded text-xs overflow-x-auto">
-            {liveResponse}
-          </pre>
+          <div className="bg-gray-100 dark:bg-gray-800 p-2 rounded text-xs overflow-x-auto font-mono">
+            <SyntaxHighlighter
+              language="json"
+              style={document.documentElement.classList.contains('dark') ? oneDark : oneLight}
+              customStyle={{ background: 'transparent', fontSize: 'inherit', margin: 0 }}
+            >
+              {liveResponse}
+            </SyntaxHighlighter>
+          </div>
         </div>
       )}
     </div>
