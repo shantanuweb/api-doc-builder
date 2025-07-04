@@ -24,7 +24,6 @@ function mockResponseFromParams(params) {
 }
 
 export default function TryItLive({
-  data,
   requestParams,
   responseParams,
   method,

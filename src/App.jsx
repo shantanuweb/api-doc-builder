@@ -299,7 +299,7 @@ export default function App() {
               {versions.length > 0 && (
                 <div className="ml-2">
                   <span className="text-xs font-bold text-gray-500 mr-2">Versions:</span>
-                  {versions.map((ver, i) => (
+                  {versions.map((ver) => (
                     <button
                       key={`${ver.name}-${ver.timestamp}`}
                       className="bg-gray-200 dark:bg-gray-700 rounded px-2 py-1 text-xs mx-1"
@@ -348,26 +348,13 @@ export default function App() {
                     setResponseParams={setResponseParams}
                     headers={actualHeaders}
                     endpoint={actualEndpoint}
-                    authType={authType}
-                    setAuthType={setAuthType}
-                    authValue={authValue}
-                    setAuthValue={setAuthValue}
-                    contentType={data.headers["Content-Type"] || ""}
-                    setContentType={(val) =>
-                      setData((d) => ({
-                        ...d,
-                        headers: { ...d.headers, "Content-Type": val },
-                      }))
-                    }
                   />
                 ) : (
                   <ManualDocEditor
                     data={data}
                     setData={setData}
-                    requestParams={requestParams}
                     setRequestParams={setRequestParams}
-                    responseParams={responseParams}
-                    setResponseParams={setResponseParams}
+
                     authType={authType}
                     setAuthType={setAuthType}
                     authValue={authValue}
@@ -512,12 +499,9 @@ export default function App() {
                     headers={actualHeaders}
                     params={requestParams.reduce((a, p) => (a[p.name]=p.example||"", a), {})}
                     body={getRequestBody()}
-                    authType={authType}
-                    authValue={authValue}
                   />
                 </div>
                 <TryItLive
-                  data={data}
                   requestParams={requestParams}
                   responseParams={responseParams}
                   method={data.method}
