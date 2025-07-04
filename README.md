@@ -33,6 +33,28 @@ A modern, open-source web app to **generate, preview, and export API documentati
 1. **Clone & install:**
 
    ```bash
+git clone https://github.com/shantanuweb/api-doc-builder.git
+cd api-doc-builder
+npm install
+```
+
+2. **Start the development server:**
+
+   ```bash
+   npm run dev
+   ```
+
+3. **Build for production:**
+
+   ```bash
+   npm run build
+   ```
+
+4. **Preview the production build:**
+
+   ```bash
+   npm run preview
+   ```
    git clone https://github.com/shantanuweb/api-doc-builder.git
    cd api-doc-builder
    npm install
