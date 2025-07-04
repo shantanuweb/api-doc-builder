@@ -9,7 +9,6 @@ import Toast from "./components/Toast";
 import TryItLive from "./components/TryItLive";
 import CodeSamples from "./components/CodeSamples";
 import SwaggerExplorerView from "./components/SwaggerExplorerView";
-import RequestSettings from "./components/RequestSettings";
 
 export default function App() {
   // State for projects/endpoints and active endpoint
@@ -315,21 +314,6 @@ export default function App() {
             {/* Main Editor */}
             <div className="grid md:grid-cols-2 gap-10">
               <div className="md:border-r md:pr-8">
-                <RequestSettings
-                  authType={authType}
-                  setAuthType={setAuthType}
-                  authValue={authValue}
-                  setAuthValue={setAuthValue}
- ea3f74-codex/move-request-setting-up-on-page
-                  contentType={data.headers["Content-Type"] || ""}
-                  setContentType={(val) =>
-                    setData((d) => ({
-                      ...d,
-                      headers: { ...d.headers, "Content-Type": val },
-                    }))
-                  }
- main
-                />
                 {mode === "analyzer" ? (
                   <AutoAnalyzer
                     setData={setData}
@@ -337,6 +321,17 @@ export default function App() {
                     setResponseParams={setResponseParams}
                     headers={actualHeaders}
                     endpoint={actualEndpoint}
+                    authType={authType}
+                    setAuthType={setAuthType}
+                    authValue={authValue}
+                    setAuthValue={setAuthValue}
+                    contentType={data.headers["Content-Type"] || ""}
+                    setContentType={(val) =>
+                      setData((d) => ({
+                        ...d,
+                        headers: { ...d.headers, "Content-Type": val },
+                      }))
+                    }
                   />
                 ) : (
                   <ManualDocEditor
@@ -346,6 +341,17 @@ export default function App() {
                     setRequestParams={setRequestParams}
                     responseParams={responseParams}
                     setResponseParams={setResponseParams}
+                    authType={authType}
+                    setAuthType={setAuthType}
+                    authValue={authValue}
+                    setAuthValue={setAuthValue}
+                    contentType={data.headers["Content-Type"] || ""}
+                    setContentType={(val) =>
+                      setData((d) => ({
+                        ...d,
+                        headers: { ...d.headers, "Content-Type": val },
+                      }))
+                    }
                   />
                 )}
                 <ParamsTable

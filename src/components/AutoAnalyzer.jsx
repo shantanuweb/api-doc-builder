@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import flattenSchema from "../utils/flattenSchema";
+import RequestSettings from "./RequestSettings";
 
 export default function AutoAnalyzer({
   setData,
@@ -7,6 +8,12 @@ export default function AutoAnalyzer({
   setResponseParams,
   headers: incomingHeaders = { "Content-Type": "application/json" },
   endpoint: incomingEndpoint = "",
+  authType,
+  setAuthType,
+  authValue,
+  setAuthValue,
+  contentType,
+  setContentType,
 }) {
   const [endpoint, setEndpoint] = useState(incomingEndpoint);
   const [method, setMethod] = useState("GET");
@@ -235,6 +242,15 @@ export default function AutoAnalyzer({
             </div>
           </div>
         )}
+
+        <RequestSettings
+          authType={authType}
+          setAuthType={setAuthType}
+          authValue={authValue}
+          setAuthValue={setAuthValue}
+          contentType={contentType}
+          setContentType={setContentType}
+        />
 
         <label className="font-medium">Method</label>
         <select
