@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { marked } from "marked";
+import DOMPurify from "dompurify";
 import AutoAnalyzer from "./components/AutoAnalyzer";
 import ManualDocEditor from "./components/ManualDocEditor";
 import ParamsTable from "./components/ParamsTable";
@@ -7,6 +8,7 @@ import Toast from "./components/Toast";
 import TryItLive from "./components/TryItLive";
 import CodeSamples from "./components/CodeSamples";
 import SwaggerExplorerView from "./components/SwaggerExplorerView";
+import RequestSettings from "./components/RequestSettings";
 
 export default function App() {
   // State for projects/endpoints and active endpoint
@@ -23,11 +25,9 @@ export default function App() {
     response: {},
     meta: { title: "", description: "" },
     integrationNotes: "",
-    bodyType: "raw", // "raw" or "form"
   });
   const [requestParams, setRequestParams] = useState([]);
   const [responseParams, setResponseParams] = useState([]);
-  const [formBody, setFormBody] = useState([{ key: "", value: "" }]);
   const [rawBody, setRawBody] = useState("");
   const [toast, setToast] = useState("");
   const [showNotesPreview, setShowNotesPreview] = useState(false);
@@ -37,6 +37,19 @@ export default function App() {
   const [authType, setAuthType] = useState("");
   const [authValue, setAuthValue] = useState("");
   const [explorerView, setExplorerView] = useState(false);
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof localStorage !== "undefined") {
+      return localStorage.getItem("theme") === "dark";
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    document.body.classList.toggle("dark", isDark);
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+    }
+  }, [isDark]);
 
   // ---- Import Collection ----
   const handleImportCollection = async (e) => {
@@ -137,50 +150,16 @@ export default function App() {
     return () => document.removeEventListener("mousedown", handler);
   }, [exportOpen]);
 
-  // ---- Body Type Handling ----
-  const handleBodyTypeChange = (type) => {
-    setData(d => ({
-      ...d,
-      bodyType: type,
-      headers: {
-        ...d.headers,
-        "Content-Type": type === "form"
-          ? "application/x-www-form-urlencoded"
-          : (d.headers["Content-Type"] === "application/x-www-form-urlencoded"
-            ? "application/json"
-            : d.headers["Content-Type"] || "application/json"),
-      },
-    }));
-  };
+  // ---- Body Handling ----
 
-  // Whenever Content-Type is changed manually, switch editor mode
-  useEffect(() => {
-    const ct = data.headers["Content-Type"];
-    if (ct === "application/x-www-form-urlencoded" && data.bodyType !== "form") {
-      setData(d => ({ ...d, bodyType: "form" }));
-    }
-    if (ct !== "application/x-www-form-urlencoded" && data.bodyType !== "raw") {
-      setData(d => ({ ...d, bodyType: "raw" }));
-    }
-    // eslint-disable-next-line
-  }, [data.headers["Content-Type"]]);
-
-  // Prepare request body based on editor mode
+  // Prepare request body from raw text
   const getRequestBody = () => {
-    if (data.method === "GET") return undefined;
-    if (data.bodyType === "form") {
-      const obj = {};
-      formBody.forEach(({ key, value }) => { if (key) obj[key] = value; });
-      return obj;
+    if (data.method === "GET" || !rawBody) return undefined;
+    try {
+      return JSON.parse(rawBody);
+    } catch {
+      return rawBody;
     }
-    if (rawBody) {
-      try {
-        return JSON.parse(rawBody);
-      } catch {
-        return rawBody;
-      }
-    }
-    return undefined;
   };
 
   // ---- UI Render ----
@@ -203,34 +182,6 @@ export default function App() {
             {explorerView ? "Editor View" : "Explorer View"}
           </button>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="font-semibold">Auth:</span>
-          <select
-            className="border rounded px-2 py-1 bg-white dark:bg-gray-800"
-            value={authType}
-            onChange={e => {
-              setAuthType(e.target.value);
-              setAuthValue("");
-            }}
-          >
-            <option value="">None</option>
-            <option value="bearer">Bearer Token</option>
-            <option value="apikey-header">API Key (Header)</option>
-            <option value="apikey-query">API Key (Query)</option>
-            <option value="basic">Basic Auth</option>
-          </select>
-          {(authType === "bearer" || authType === "apikey-header" || authType === "apikey-query" || authType === "basic") && (
-            <input
-              className="border rounded px-2 py-1 w-32"
-              value={authValue}
-              onChange={e => setAuthValue(e.target.value)}
-              placeholder={
-                authType === "bearer" ? "Token..." :
-                authType === "apikey-header" ? "X-API-KEY..." :
-                authType === "apikey-query" ? "api_key=..." : "user:pass"
-              }
-            />
-          )}
           {/* Export Dropdown */}
           <div className="relative" id="exportDropdown">
             <button
@@ -239,14 +190,14 @@ export default function App() {
             >
               Export Documentation ▼
             </button>
-            {exportOpen && (
-              <div className="absolute mt-1 bg-white dark:bg-gray-800 border rounded shadow-lg z-10 min-w-[180px]">
-                <button
-                  onClick={() => { handleExportPDF(); setExportOpen(false); }}
-                  className="block w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  PDF
-                </button>
+          {exportOpen && (
+            <div className="absolute mt-1 bg-white dark:bg-gray-800 border rounded shadow-lg z-10 min-w-[180px]">
+              <button
+                onClick={() => { handleExportPDF(); setExportOpen(false); }}
+                className="block w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                PDF
+              </button>
                 <button
                   onClick={() => { handleExportMarkdown(); setExportOpen(false); }}
                   className="block w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -264,11 +215,22 @@ export default function App() {
                   className="block w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   OpenAPI
+              </button>
+            </div>
+          )}
+        </div>
+        <button
+          className="ml-4 px-3 py-2 rounded bg-gray-200 dark:bg-gray-700 text-sm"
+          onClick={() => setIsDark((v) => !v)}
+        >
+          {isDark ? 'Light' : 'Dark'} Mode
+        </button>
+      </div>
+    </header>
                 </button>
               </div>
             )}
           </div>
-        </div>
       </header>
 
       <div className="max-w-7xl mx-auto py-8 px-2 flex">
@@ -339,6 +301,21 @@ export default function App() {
             {/* Main Editor */}
             <div className="grid md:grid-cols-2 gap-10">
               <div className="md:border-r md:pr-8">
+                <RequestSettings
+                  authType={authType}
+                  setAuthType={setAuthType}
+                  authValue={authValue}
+                  setAuthValue={setAuthValue}
+ ea3f74-codex/move-request-setting-up-on-page
+                  contentType={data.headers["Content-Type"] || ""}
+                  setContentType={(val) =>
+                    setData((d) => ({
+                      ...d,
+                      headers: { ...d.headers, "Content-Type": val },
+                    }))
+                  }
+ main
+                />
                 {mode === "analyzer" ? (
                   <AutoAnalyzer
                     setData={setData}
@@ -372,51 +349,10 @@ export default function App() {
                   editable={true}
                 />
 
+                {/* Request Body */}
                 {/* Content-Type and Body Format */}
                 <div className="mb-6">
-                  <label className="block font-semibold mb-1">Content-Type:</label>
-                  <select
-                    className="border rounded px-2 py-1 bg-white dark:bg-gray-800 mb-2"
-                    value={data.headers["Content-Type"] || ""}
-                    onChange={e =>
-                      setData(d => ({
-                        ...d,
-                        headers: { ...d.headers, "Content-Type": e.target.value }
-                      }))
-                    }
-                  >
-                    <option value="application/json">application/json</option>
-                    <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
-                    <option value="text/plain">text/plain</option>
-                  </select>
-                  {/* Body format toggle */}
                   {data.method !== "GET" && (
-                    <div className="mb-2">
-                      <label className="font-semibold mr-2">Body Format:</label>
-                      <label>
-                        <input
-                          type="radio"
-                          name="bodyType"
-                          value="raw"
-                          checked={data.bodyType === "raw"}
-                          onChange={() => handleBodyTypeChange("raw")}
-                        />{" "}
-                        Raw Body
-                      </label>
-                      <label className="ml-4">
-                        <input
-                          type="radio"
-                          name="bodyType"
-                          value="form"
-                          checked={data.bodyType === "form"}
-                          onChange={() => handleBodyTypeChange("form")}
-                        />{" "}
-                        Form (x-www-form-urlencoded)
-                      </label>
-                    </div>
-                  )}
-                  {/* Raw or form editor */}
-                  {data.method !== "GET" && data.bodyType === "raw" && (
                     <textarea
                       className="w-full border px-2 py-2 rounded resize-y text-black dark:text-white bg-white dark:bg-gray-800"
                       rows={4}
@@ -424,48 +360,6 @@ export default function App() {
                       value={rawBody}
                       onChange={e => setRawBody(e.target.value)}
                     />
-                  )}
-                  {data.method !== "GET" && data.bodyType === "form" && (
-                    <div>
-                      {formBody.map((row, idx) => (
-                        <div className="flex gap-2 mb-1" key={idx}>
-                          <input
-                            className="border px-2 py-1 rounded w-1/2"
-                            placeholder="Key"
-                            value={row.key}
-                            onChange={e => {
-                              const updated = [...formBody];
-                              updated[idx].key = e.target.value;
-                              setFormBody(updated);
-                            }}
-                          />
-                          <input
-                            className="border px-2 py-1 rounded w-1/2"
-                            placeholder="Value"
-                            value={row.value}
-                            onChange={e => {
-                              const updated = [...formBody];
-                              updated[idx].value = e.target.value;
-                              setFormBody(updated);
-                            }}
-                          />
-                          <button
-                            className="px-2 rounded text-red-500"
-                            onClick={() => setFormBody(formBody.filter((_, i) => i !== idx))}
-                            type="button"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      ))}
-                      <button
-                        className="text-xs text-green-600 mt-1 underline"
-                        onClick={() => setFormBody([...formBody, { key: "", value: "" }])}
-                        type="button"
-                      >
-                        + Add Param
-                      </button>
-                    </div>
                   )}
                 </div>
                 {/* Integration notes */}
@@ -485,7 +379,9 @@ export default function App() {
                     <div className="prose prose-sm dark:prose-invert bg-gray-50 dark:bg-gray-900 rounded p-3 overflow-auto min-h-[6rem]">
                       <div
                         dangerouslySetInnerHTML={{
-                          __html: marked.parse(data.integrationNotes || ""),
+                          __html: DOMPurify.sanitize(
+                            marked.parse(data.integrationNotes || "")
+                          ),
                         }}
                       />
                     </div>
@@ -555,7 +451,9 @@ export default function App() {
                       <div className="prose prose-sm dark:prose-invert bg-gray-100 dark:bg-gray-900 p-2 rounded">
                         <div
                           dangerouslySetInnerHTML={{
-                            __html: marked.parse(data.integrationNotes || ""),
+                            __html: DOMPurify.sanitize(
+                              marked.parse(data.integrationNotes || "")
+                            ),
                           }}
                         />
                       </div>
@@ -578,9 +476,6 @@ export default function App() {
                   method={data.method}
                   headers={actualHeaders}
                   endpoint={actualEndpoint}
-                  bodyType={data.bodyType}
-                  formBody={formBody}
-                  rawBody={rawBody}
                 />
               </div>
             </div>
