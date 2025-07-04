@@ -4,15 +4,19 @@ import flattenSchema from "../utils/flattenSchema";
 export default function ManualDocEditor({
   data,
   setData,
-  requestParams,
   setRequestParams,
+  authType,
+  setAuthType,
+  authValue,
+  setAuthValue,
+  contentType,
+  setContentType,
 }) {
   // Local state for the fields
   const [endpoint, setEndpoint] = useState(data.baseUrl + (data.path || ""));
   const [method, setMethod] = useState(data.method || "GET");
   const [bodyJson, setBodyJson] = useState("");
   const [queryParams, setQueryParams] = useState([{ name: "", value: "" }]);
-  const [pathParams, setPathParams] = useState({});
 
   // Path Params handling
   const pathParamsUI =
@@ -128,16 +132,6 @@ export default function ManualDocEditor({
             {pathParamsUI.map((key) => (
               <div key={key} className="flex items-center gap-1">
                 <span className="font-mono bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">{key}</span>
-                {/* Optionally add sample value field */}
-                {/* <input
-                  type="text"
-                  value={pathParams[key] || ""}
-                  onChange={(e) =>
-                    setPathParams((prev) => ({ ...prev, [key]: e.target.value }))
-                  }
-                  className="border px-1 py-1 rounded text-black dark:text-white bg-white dark:bg-gray-800 w-24"
-                  placeholder="value"
-                /> */}
               </div>
             ))}
           </div>

@@ -32,8 +32,6 @@ export default function SwaggerExplorerView({ endpoints }) {
               headers={ep.headers || {}}
               params={(ep.requestParams || []).reduce((a, p) => (a[p.name]=p.example||"", a), {})}
               body={ep.requestBody}
-              authType={ep.authType}
-              authValue={ep.authValue}
             />
           </div>
         </details>
