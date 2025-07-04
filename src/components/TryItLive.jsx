@@ -27,7 +27,6 @@ export default function TryItLive({
   method,
   headers,
   endpoint,
-  bodyType,
 }) {
   const [useMock, setUseMock] = useState(false);
   const [reqInput, setReqInput] = useState({});

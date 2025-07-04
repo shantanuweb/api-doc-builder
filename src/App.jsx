@@ -23,11 +23,9 @@ export default function App() {
     response: {},
     meta: { title: "", description: "" },
     integrationNotes: "",
-    bodyType: "raw", // "raw" or "form"
   });
   const [requestParams, setRequestParams] = useState([]);
   const [responseParams, setResponseParams] = useState([]);
-  const [formBody, setFormBody] = useState([{ key: "", value: "" }]);
   const [rawBody, setRawBody] = useState("");
   const [toast, setToast] = useState("");
   const [showNotesPreview, setShowNotesPreview] = useState(false);
@@ -137,50 +135,16 @@ export default function App() {
     return () => document.removeEventListener("mousedown", handler);
   }, [exportOpen]);
 
-  // ---- Body Type Handling ----
-  const handleBodyTypeChange = (type) => {
-    setData(d => ({
-      ...d,
-      bodyType: type,
-      headers: {
-        ...d.headers,
-        "Content-Type": type === "form"
-          ? "application/x-www-form-urlencoded"
-          : (d.headers["Content-Type"] === "application/x-www-form-urlencoded"
-            ? "application/json"
-            : d.headers["Content-Type"] || "application/json"),
-      },
-    }));
-  };
+  // ---- Body Handling ----
 
-  // Whenever Content-Type is changed manually, switch editor mode
-  useEffect(() => {
-    const ct = data.headers["Content-Type"];
-    if (ct === "application/x-www-form-urlencoded" && data.bodyType !== "form") {
-      setData(d => ({ ...d, bodyType: "form" }));
-    }
-    if (ct !== "application/x-www-form-urlencoded" && data.bodyType !== "raw") {
-      setData(d => ({ ...d, bodyType: "raw" }));
-    }
-    // eslint-disable-next-line
-  }, [data.headers["Content-Type"]]);
-
-  // Prepare request body based on editor mode
+  // Prepare request body from raw text
   const getRequestBody = () => {
-    if (data.method === "GET") return undefined;
-    if (data.bodyType === "form") {
-      const obj = {};
-      formBody.forEach(({ key, value }) => { if (key) obj[key] = value; });
-      return obj;
+    if (data.method === "GET" || !rawBody) return undefined;
+    try {
+      return JSON.parse(rawBody);
+    } catch {
+      return rawBody;
     }
-    if (rawBody) {
-      try {
-        return JSON.parse(rawBody);
-      } catch {
-        return rawBody;
-      }
-    }
-    return undefined;
   };
 
   // ---- UI Render ----
@@ -389,34 +353,7 @@ export default function App() {
                     <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
                     <option value="text/plain">text/plain</option>
                   </select>
-                  {/* Body format toggle */}
                   {data.method !== "GET" && (
-                    <div className="mb-2">
-                      <label className="font-semibold mr-2">Body Format:</label>
-                      <label>
-                        <input
-                          type="radio"
-                          name="bodyType"
-                          value="raw"
-                          checked={data.bodyType === "raw"}
-                          onChange={() => handleBodyTypeChange("raw")}
-                        />{" "}
-                        Raw Body
-                      </label>
-                      <label className="ml-4">
-                        <input
-                          type="radio"
-                          name="bodyType"
-                          value="form"
-                          checked={data.bodyType === "form"}
-                          onChange={() => handleBodyTypeChange("form")}
-                        />{" "}
-                        Form (x-www-form-urlencoded)
-                      </label>
-                    </div>
-                  )}
-                  {/* Raw or form editor */}
-                  {data.method !== "GET" && data.bodyType === "raw" && (
                     <textarea
                       className="w-full border px-2 py-2 rounded resize-y text-black dark:text-white bg-white dark:bg-gray-800"
                       rows={4}
@@ -424,48 +361,6 @@ export default function App() {
                       value={rawBody}
                       onChange={e => setRawBody(e.target.value)}
                     />
-                  )}
-                  {data.method !== "GET" && data.bodyType === "form" && (
-                    <div>
-                      {formBody.map((row, idx) => (
-                        <div className="flex gap-2 mb-1" key={idx}>
-                          <input
-                            className="border px-2 py-1 rounded w-1/2"
-                            placeholder="Key"
-                            value={row.key}
-                            onChange={e => {
-                              const updated = [...formBody];
-                              updated[idx].key = e.target.value;
-                              setFormBody(updated);
-                            }}
-                          />
-                          <input
-                            className="border px-2 py-1 rounded w-1/2"
-                            placeholder="Value"
-                            value={row.value}
-                            onChange={e => {
-                              const updated = [...formBody];
-                              updated[idx].value = e.target.value;
-                              setFormBody(updated);
-                            }}
-                          />
-                          <button
-                            className="px-2 rounded text-red-500"
-                            onClick={() => setFormBody(formBody.filter((_, i) => i !== idx))}
-                            type="button"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      ))}
-                      <button
-                        className="text-xs text-green-600 mt-1 underline"
-                        onClick={() => setFormBody([...formBody, { key: "", value: "" }])}
-                        type="button"
-                      >
-                        + Add Param
-                      </button>
-                    </div>
                   )}
                 </div>
                 {/* Integration notes */}
@@ -578,9 +473,6 @@ export default function App() {
                   method={data.method}
                   headers={actualHeaders}
                   endpoint={actualEndpoint}
-                  bodyType={data.bodyType}
-                  formBody={formBody}
-                  rawBody={rawBody}
                 />
               </div>
             </div>
