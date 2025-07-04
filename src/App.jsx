@@ -314,6 +314,19 @@ export default function App() {
             {/* Main Editor */}
             <div className="grid md:grid-cols-2 gap-10">
               <div className="md:border-r md:pr-8">
+                <RequestSettings
+                  authType={authType}
+                  setAuthType={setAuthType}
+                  authValue={authValue}
+                  setAuthValue={setAuthValue}
+                  contentType={data.headers["Content-Type"] || ""}
+                  setContentType={(val) =>
+                    setData((d) => ({
+                      ...d,
+                      headers: { ...d.headers, "Content-Type": val },
+                    }))
+                  }
+                />
                 {mode === "analyzer" ? (
                   <AutoAnalyzer
                     setData={setData}
