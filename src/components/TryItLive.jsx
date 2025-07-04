@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Spinner from "./Spinner";
 
 // Generate a mock response from documented responseParams (array of {name,type})
 function mockResponseFromParams(params) {
@@ -148,6 +149,7 @@ export default function TryItLive({
       >
         {isLoading ? "Sending..." : useMock ? "Simulate" : "Send Request"}
       </button>
+      {isLoading && <Spinner className="ml-2" />}
       {error && <div className="text-red-600 mt-2">{error}</div>}
       {liveResponse && (
         <div className="mt-4">
