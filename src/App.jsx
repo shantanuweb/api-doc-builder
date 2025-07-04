@@ -37,6 +37,19 @@ export default function App() {
   const [authType, setAuthType] = useState("");
   const [authValue, setAuthValue] = useState("");
   const [explorerView, setExplorerView] = useState(false);
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof localStorage !== "undefined") {
+      return localStorage.getItem("theme") === "dark";
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    document.body.classList.toggle("dark", isDark);
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+    }
+  }, [isDark]);
 
   // ---- Import Collection ----
   const handleImportCollection = async (e) => {
@@ -177,14 +190,14 @@ export default function App() {
             >
               Export Documentation ▼
             </button>
-            {exportOpen && (
-              <div className="absolute mt-1 bg-white dark:bg-gray-800 border rounded shadow-lg z-10 min-w-[180px]">
-                <button
-                  onClick={() => { handleExportPDF(); setExportOpen(false); }}
-                  className="block w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  PDF
-                </button>
+          {exportOpen && (
+            <div className="absolute mt-1 bg-white dark:bg-gray-800 border rounded shadow-lg z-10 min-w-[180px]">
+              <button
+                onClick={() => { handleExportPDF(); setExportOpen(false); }}
+                className="block w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                PDF
+              </button>
                 <button
                   onClick={() => { handleExportMarkdown(); setExportOpen(false); }}
                   className="block w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -202,6 +215,18 @@ export default function App() {
                   className="block w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   OpenAPI
+              </button>
+            </div>
+          )}
+        </div>
+        <button
+          className="ml-4 px-3 py-2 rounded bg-gray-200 dark:bg-gray-700 text-sm"
+          onClick={() => setIsDark((v) => !v)}
+        >
+          {isDark ? 'Light' : 'Dark'} Mode
+        </button>
+      </div>
+    </header>
                 </button>
               </div>
             )}
