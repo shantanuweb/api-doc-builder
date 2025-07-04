@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import flattenSchema from "../utils/flattenSchema";
 import Spinner from "./Spinner";
 import RequestSettings from "./RequestSettings";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneLight, oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 export default function AutoAnalyzer({
   setData,
   setRequestParams,
@@ -381,7 +383,13 @@ export default function AutoAnalyzer({
         {apiResponse && (
           <div className="mt-4 bg-gray-100 dark:bg-gray-900 p-2 rounded font-mono text-xs overflow-x-auto">
             <b>Response:</b>
-            <pre>{JSON.stringify(apiResponse, null, 2)}</pre>
+            <SyntaxHighlighter
+              language="json"
+              style={document.documentElement.classList.contains('dark') ? oneDark : oneLight}
+              customStyle={{ background: 'transparent', fontSize: 'inherit', margin: 0 }}
+            >
+              {JSON.stringify(apiResponse, null, 2)}
+            </SyntaxHighlighter>
           </div>
         )}
       </div>
