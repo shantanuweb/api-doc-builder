@@ -45,12 +45,9 @@ export default function App() {
   });
 
   useEffect(() => {
-    if (isDark) {
-      document.body.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.body.classList.remove("dark");
-      localStorage.setItem("theme", "light");
+    document.body.classList.toggle("dark", isDark);
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem("theme", isDark ? "dark" : "light");
     }
   }, [isDark]);
 
