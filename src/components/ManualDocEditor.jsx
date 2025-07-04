@@ -119,8 +119,9 @@ export default function ManualDocEditor({
 
   return (
     <div>
-      <label className="font-medium">Endpoint</label>
+      <label htmlFor="manual-endpoint" className="font-medium">Endpoint</label>
       <input
+        id="manual-endpoint"
         type="text"
         value={endpoint}
         onChange={(e) => setEndpoint(e.target.value)}
@@ -154,7 +155,7 @@ export default function ManualDocEditor({
           </div>
         </div>
       )}
-
+      <label htmlFor="manual-method" className="font-medium">Method</label>
       <RequestSettings
         authType={authType}
         setAuthType={setAuthType}
@@ -166,6 +167,7 @@ export default function ManualDocEditor({
 
       <label className="font-medium">Method</label>
       <select
+        id="manual-method"
         value={method}
         onChange={(e) => setMethod(e.target.value)}
         className="border px-2 py-1 rounded text-black dark:text-white bg-white dark:bg-gray-800 w-full mb-2"
@@ -194,6 +196,7 @@ export default function ManualDocEditor({
                 <tr key={idx}>
                   <td className="border px-2 py-1">
                     <input
+                      aria-label="Query parameter name"
                       type="text"
                       value={param.name}
                       onChange={(e) =>
@@ -205,6 +208,7 @@ export default function ManualDocEditor({
                   </td>
                   <td className="border px-2 py-1">
                     <input
+                      aria-label="Query parameter value"
                       type="text"
                       value={param.value}
                       onChange={(e) =>
@@ -242,8 +246,9 @@ export default function ManualDocEditor({
       {/* Body Params for POST/PUT/PATCH */}
         {(method === "POST" || method === "PUT" || method === "PATCH") && (
           <>
-            <label className="font-medium">Body (JSON)</label>
+            <label htmlFor="manual-body" className="font-medium">Body (JSON)</label>
             <textarea
+              id="manual-body"
               value={bodyJson}
               onChange={(e) => setBodyJson(e.target.value)}
               className="border px-2 py-1 rounded font-mono text-black dark:text-white bg-white dark:bg-gray-800 w-full"
