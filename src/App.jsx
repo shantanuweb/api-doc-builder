@@ -7,6 +7,7 @@ import Toast from "./components/Toast";
 import TryItLive from "./components/TryItLive";
 import CodeSamples from "./components/CodeSamples";
 import SwaggerExplorerView from "./components/SwaggerExplorerView";
+import RequestSettings from "./components/RequestSettings";
 
 export default function App() {
   // State for projects/endpoints and active endpoint
@@ -203,34 +204,6 @@ export default function App() {
             {explorerView ? "Editor View" : "Explorer View"}
           </button>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="font-semibold">Auth:</span>
-          <select
-            className="border rounded px-2 py-1 bg-white dark:bg-gray-800"
-            value={authType}
-            onChange={e => {
-              setAuthType(e.target.value);
-              setAuthValue("");
-            }}
-          >
-            <option value="">None</option>
-            <option value="bearer">Bearer Token</option>
-            <option value="apikey-header">API Key (Header)</option>
-            <option value="apikey-query">API Key (Query)</option>
-            <option value="basic">Basic Auth</option>
-          </select>
-          {(authType === "bearer" || authType === "apikey-header" || authType === "apikey-query" || authType === "basic") && (
-            <input
-              className="border rounded px-2 py-1 w-32"
-              value={authValue}
-              onChange={e => setAuthValue(e.target.value)}
-              placeholder={
-                authType === "bearer" ? "Token..." :
-                authType === "apikey-header" ? "X-API-KEY..." :
-                authType === "apikey-query" ? "api_key=..." : "user:pass"
-              }
-            />
-          )}
           {/* Export Dropdown */}
           <div className="relative" id="exportDropdown">
             <button
@@ -268,7 +241,6 @@ export default function App() {
               </div>
             )}
           </div>
-        </div>
       </header>
 
       <div className="max-w-7xl mx-auto py-8 px-2 flex">
@@ -371,6 +343,7 @@ export default function App() {
                   hasRequired={false}
                   editable={true}
                 />
+                <RequestSettings authType={authType} setAuthType={setAuthType} authValue={authValue} setAuthValue={setAuthValue} />
 
                 {/* Content-Type and Body Format */}
                 <div className="mb-6">
