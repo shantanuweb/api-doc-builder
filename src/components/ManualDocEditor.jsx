@@ -1,20 +1,11 @@
 import React, { useState, useEffect } from "react";
 import flattenSchema from "../utils/flattenSchema";
-import RequestSettings from "./RequestSettings";
 
 export default function ManualDocEditor({
   data,
   setData,
   requestParams,
   setRequestParams,
-  responseParams,
-  setResponseParams,
-  authType,
-  setAuthType,
-  authValue,
-  setAuthValue,
-  contentType,
-  setContentType,
 }) {
   // Local state for the fields
   const [endpoint, setEndpoint] = useState(data.baseUrl + (data.path || ""));
@@ -155,17 +146,7 @@ export default function ManualDocEditor({
           </div>
         </div>
       )}
-      <label htmlFor="manual-method" className="font-medium">Method</label>
-      <RequestSettings
-        authType={authType}
-        setAuthType={setAuthType}
-        authValue={authValue}
-        setAuthValue={setAuthValue}
-        contentType={contentType}
-        setContentType={setContentType}
-      />
-
-      <label className="font-medium">Method</label>
+        <label htmlFor="manual-method" className="font-medium">Method</label>
       <select
         id="manual-method"
         value={method}
