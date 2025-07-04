@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import flattenSchema from "../utils/flattenSchema";
-import RequestSettings from "./RequestSettings";
 
 export default function ManualDocEditor({
   data,
@@ -141,17 +140,7 @@ export default function ManualDocEditor({
           </div>
         </div>
       )}
-      <label htmlFor="manual-method" className="font-medium">Method</label>
-      <RequestSettings
-        authType={authType}
-        setAuthType={setAuthType}
-        authValue={authValue}
-        setAuthValue={setAuthValue}
-        contentType={contentType}
-        setContentType={setContentType}
-      />
-
-      <label className="font-medium">Method</label>
+        <label htmlFor="manual-method" className="font-medium">Method</label>
       <select
         id="manual-method"
         value={method}

@@ -1,19 +1,12 @@
 import React, { useState, useEffect } from "react";
 import flattenSchema from "../utils/flattenSchema";
 import Spinner from "./Spinner";
-import RequestSettings from "./RequestSettings";
 export default function AutoAnalyzer({
   setData,
   setRequestParams,
   setResponseParams,
   headers: incomingHeaders = { "Content-Type": "application/json" },
   endpoint: incomingEndpoint = "",
-  authType,
-  setAuthType,
-  authValue,
-  setAuthValue,
-  contentType,
-  setContentType,
 }) {
   const [endpoint, setEndpoint] = useState(incomingEndpoint);
   const [method, setMethod] = useState("GET");
@@ -23,7 +16,7 @@ export default function AutoAnalyzer({
   const [bodyJson, setBodyJson] = useState("");
   const [queryParams, setQueryParams] = useState([{ name: "", value: "" }]);
   const [pathParams, setPathParams] = useState({});
-  const [error, setError] = useState("");
+  const [error, setError] = useState(null);
   const [apiResponse, setApiResponse] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -59,13 +52,13 @@ export default function AutoAnalyzer({
 
   const handleAnalyze = async () => {
     setIsLoading(true);
-    setError("");
+    setError(null);
     setApiResponse(null);
     let parsedHeaders = {};
     try {
       parsedHeaders = headers ? JSON.parse(headers) : {};
     } catch (e) {
-      setError("Headers must be valid JSON.");
+      setError({ message: "Headers must be valid JSON." });
       setIsLoading(false);
       return;
     }
@@ -94,12 +87,12 @@ export default function AutoAnalyzer({
         try {
           bodyObj = bodyJson ? JSON.parse(bodyJson) : null;
         } catch (e) {
-          setError("Body is not valid JSON.");
+          setError({ message: "Body is not valid JSON." });
           setIsLoading(false);
           return;
         }
         if (!bodyObj || Object.keys(bodyObj).length === 0) {
-          setError("Please provide a non-empty JSON body.");
+          setError({ message: "Please provide a non-empty JSON body." });
           setIsLoading(false);
           return;
         }
@@ -144,9 +137,9 @@ export default function AutoAnalyzer({
       let json;
       try {
         json = JSON.parse(responseText);
-        setError("");
+        setError(null);
       } catch (e) {
-        setError("Response is not valid JSON. See raw response below.");
+        setError({ message: "Response is not valid JSON. See raw response below." });
         json = { raw: responseText };
       }
 
@@ -177,14 +170,16 @@ export default function AutoAnalyzer({
         response: json,
       }));
     } catch (err) {
-      setError(
-        (err.message ? err.message + "\n\n" : "") +
-          "Cannot fetch! This may be due to:\n" +
-          "• API endpoint is wrong\n" +
-          "• JSON in headers or body is invalid\n" +
-          "• CORS (the API blocks browser access)\n\n" +
-          "Try Manual Entry mode if you are stuck, or use a mock API endpoint."
-      );
+      setError({
+        message: err.message || "",
+        details: [
+          "API endpoint is wrong",
+          "JSON in headers or body is invalid",
+          "CORS (the API blocks browser access)",
+        ],
+        suggestion:
+          "Try Manual Entry mode if you are stuck, or use a mock API endpoint.",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -251,16 +246,6 @@ export default function AutoAnalyzer({
         )}
 
         <label htmlFor="auto-method" className="font-medium">Method</label>
-        <RequestSettings
-          authType={authType}
-          setAuthType={setAuthType}
-          authValue={authValue}
-          setAuthValue={setAuthValue}
-          contentType={contentType}
-          setContentType={setContentType}
-        />
-
-        <label className="font-medium">Method</label>
         <select
           id="auto-method"
           value={method}
@@ -374,8 +359,25 @@ export default function AutoAnalyzer({
         </button>
         {isLoading && <Spinner className="ml-2" />}
         {error && (
-          <div className="text-red-600 mt-2 whitespace-pre-line">
-            {error}
+          <div className="text-red-600 mt-2">
+            {typeof error === "string" ? (
+              <span>{error}</span>
+            ) : (
+              <>
+                {error.message && <p>{error.message}</p>}
+                {error.details && (
+                  <>
+                    <p>Cannot fetch! This may be due to:</p>
+                    <ul className="list-disc list-inside pl-4">
+                      {error.details.map((d, i) => (
+                        <li key={i}>{d}</li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+                {error.suggestion && <p className="mt-2">{error.suggestion}</p>}
+              </>
+            )}
           </div>
         )}
         {apiResponse && (

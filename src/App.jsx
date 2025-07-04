@@ -348,23 +348,13 @@ export default function App() {
                     setResponseParams={setResponseParams}
                     headers={actualHeaders}
                     endpoint={actualEndpoint}
-                    authType={authType}
-                    setAuthType={setAuthType}
-                    authValue={authValue}
-                    setAuthValue={setAuthValue}
-                    contentType={data.headers["Content-Type"] || ""}
-                    setContentType={(val) =>
-                      setData((d) => ({
-                        ...d,
-                        headers: { ...d.headers, "Content-Type": val },
-                      }))
-                    }
                   />
                 ) : (
                   <ManualDocEditor
                     data={data}
                     setData={setData}
                     setRequestParams={setRequestParams}
+
                     authType={authType}
                     setAuthType={setAuthType}
                     authValue={authValue}
