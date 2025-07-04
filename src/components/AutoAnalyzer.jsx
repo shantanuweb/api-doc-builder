@@ -1,19 +1,33 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import flattenSchema from "../utils/flattenSchema";
 
 export default function AutoAnalyzer({
   setData,
   setRequestParams,
   setResponseParams,
+  headers: incomingHeaders = { "Content-Type": "application/json" },
+  endpoint: incomingEndpoint = "",
 }) {
-  const [endpoint, setEndpoint] = useState("");
+  const [endpoint, setEndpoint] = useState(incomingEndpoint);
   const [method, setMethod] = useState("GET");
-  const [headers, setHeaders] = useState('{"Content-Type": "application/json"}');
+  const [headers, setHeaders] = useState(
+    JSON.stringify(incomingHeaders, null, 2)
+  );
   const [bodyJson, setBodyJson] = useState("");
   const [queryParams, setQueryParams] = useState([{ name: "", value: "" }]);
   const [pathParams, setPathParams] = useState({});
   const [error, setError] = useState("");
   const [apiResponse, setApiResponse] = useState(null);
+
+  // Update local endpoint and headers when incoming props change
+  useEffect(() => {
+    setEndpoint(incomingEndpoint);
+  }, [incomingEndpoint]);
+
+  const incomingHeadersStr = JSON.stringify(incomingHeaders, null, 2);
+  useEffect(() => {
+    setHeaders(incomingHeadersStr);
+  }, [incomingHeadersStr]);
 
   // Compose endpoint with path params
   const endpointWithPathParams = endpoint.replace(/\{(\w+)\}/g, (_, k) => pathParams[k] || `{${k}}`);

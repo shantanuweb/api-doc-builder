@@ -276,6 +276,19 @@ export default function App() {
             {/* Main Editor */}
             <div className="grid md:grid-cols-2 gap-10">
               <div className="md:border-r md:pr-8">
+                <RequestSettings
+                  authType={authType}
+                  setAuthType={setAuthType}
+                  authValue={authValue}
+                  setAuthValue={setAuthValue}
+                  contentType={data.headers["Content-Type"] || ""}
+                  setContentType={(val) =>
+                    setData((d) => ({
+                      ...d,
+                      headers: { ...d.headers, "Content-Type": val },
+                    }))
+                  }
+                />
                 {mode === "analyzer" ? (
                   <AutoAnalyzer
                     setData={setData}
@@ -308,25 +321,8 @@ export default function App() {
                   hasRequired={false}
                   editable={true}
                 />
-                <RequestSettings authType={authType} setAuthType={setAuthType} authValue={authValue} setAuthValue={setAuthValue} />
-
-                {/* Content-Type and Body Format */}
+                {/* Request Body */}
                 <div className="mb-6">
-                  <label className="block font-semibold mb-1">Content-Type:</label>
-                  <select
-                    className="border rounded px-2 py-1 bg-white dark:bg-gray-800 mb-2"
-                    value={data.headers["Content-Type"] || ""}
-                    onChange={e =>
-                      setData(d => ({
-                        ...d,
-                        headers: { ...d.headers, "Content-Type": e.target.value }
-                      }))
-                    }
-                  >
-                    <option value="application/json">application/json</option>
-                    <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
-                    <option value="text/plain">text/plain</option>
-                  </select>
                   {data.method !== "GET" && (
                     <textarea
                       className="w-full border px-2 py-2 rounded resize-y text-black dark:text-white bg-white dark:bg-gray-800"
