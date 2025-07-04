@@ -5,12 +5,6 @@ export default function ManualDocEditor({
   data,
   setData,
   setRequestParams,
-  authType,
-  setAuthType,
-  authValue,
-  setAuthValue,
-  contentType,
-  setContentType,
 }) {
   // Local state for the fields
   const [endpoint, setEndpoint] = useState(data.baseUrl + (data.path || ""));
