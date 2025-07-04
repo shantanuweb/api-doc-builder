@@ -152,6 +152,7 @@ export default function AutoAnalyzer({
 
       setApiResponse(json);
       setResponseParams(flattenSchema(json));
+
       let baseUrl = endpointWithPathParams;
       let path = "";
       try {
@@ -165,6 +166,7 @@ export default function AutoAnalyzer({
           path = m[2];
         }
       }
+
       setData((d) => ({
         ...d,
         baseUrl,
@@ -173,17 +175,16 @@ export default function AutoAnalyzer({
         headers: parsedHeaders,
         requestBody: fetchBody,
         response: json,
-        }));
-      } catch (err) {
-        setError(
-          (err.message ? err.message + "\n\n" : "") +
-            "Cannot fetch! This may be due to:\n" +
-              "• API endpoint is wrong\n" +
-              "• JSON in headers or body is invalid\n" +
-              "• CORS (the API blocks browser access)\n\n" +
-              "Try Manual Entry mode if you are stuck, or use a mock API endpoint."
-        );
-      }
+      }));
+    } catch (err) {
+      setError(
+        (err.message ? err.message + "\n\n" : "") +
+          "Cannot fetch! This may be due to:\n" +
+          "• API endpoint is wrong\n" +
+          "• JSON in headers or body is invalid\n" +
+          "• CORS (the API blocks browser access)\n\n" +
+          "Try Manual Entry mode if you are stuck, or use a mock API endpoint."
+      );
     } finally {
       setIsLoading(false);
     }
