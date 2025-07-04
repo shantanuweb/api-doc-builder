@@ -12,9 +12,12 @@ export default function RequestSettings({
     <div className="mb-6">
       <h3 className="font-semibold mb-2">Request Header</h3>
       <div className="mb-3">
-        <label className="block font-semibold mb-1">Auth:</label>
+        <label htmlFor="authType" className="block font-semibold mb-1">
+          Auth:
+        </label>
         <div className="flex items-center gap-2">
           <select
+            id="authType"
             className="border rounded px-2 py-1 bg-white dark:bg-gray-800"
             value={authType}
             onChange={(e) => {
@@ -33,6 +36,7 @@ export default function RequestSettings({
             authType === "apikey-query" ||
             authType === "basic") && (
             <input
+              aria-label="Authentication value"
               className="border rounded px-2 py-1 w-32"
               value={authValue}
               onChange={(e) => setAuthValue(e.target.value)}
@@ -50,8 +54,11 @@ export default function RequestSettings({
         </div>
       </div>
       <div>
-        <label className="block font-semibold mb-1">Content-Type:</label>
+        <label htmlFor="contentType" className="block font-semibold mb-1">
+          Content-Type:
+        </label>
         <select
+          id="contentType"
           className="border rounded px-2 py-1 bg-white dark:bg-gray-800"
           value={contentType}
           onChange={(e) => setContentType(e.target.value)}

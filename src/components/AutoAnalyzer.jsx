@@ -201,8 +201,9 @@ export default function AutoAnalyzer({
   return (
     <div className="mb-4">
       <div className="flex flex-col gap-2">
-        <label className="font-medium">Endpoint</label>
+        <label htmlFor="auto-endpoint" className="font-medium">Endpoint</label>
         <input
+          id="auto-endpoint"
           type="text"
           value={endpoint}
           onChange={(e) => setEndpoint(e.target.value)}
@@ -219,6 +220,7 @@ export default function AutoAnalyzer({
                 <div key={key} className="flex items-center gap-1">
                   <span className="font-mono bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">{key}</span>
                   <input
+                    aria-label={`${key} value`}
                     type="text"
                     value={pathParams[key] || ""}
                     onChange={(e) =>
@@ -236,8 +238,9 @@ export default function AutoAnalyzer({
           </div>
         )}
 
-        <label className="font-medium">Method</label>
+        <label htmlFor="auto-method" className="font-medium">Method</label>
         <select
+          id="auto-method"
           value={method}
           onChange={(e) => setMethod(e.target.value)}
           className="border px-2 py-1 rounded text-black dark:text-white bg-white dark:bg-gray-800"
@@ -266,6 +269,7 @@ export default function AutoAnalyzer({
                   <tr key={idx}>
                     <td className="border px-2 py-1">
                       <input
+                        aria-label="Query parameter name"
                         type="text"
                         value={param.name}
                         onChange={(e) =>
@@ -277,6 +281,7 @@ export default function AutoAnalyzer({
                     </td>
                     <td className="border px-2 py-1">
                       <input
+                        aria-label="Query parameter value"
                         type="text"
                         value={param.value}
                         onChange={(e) =>
@@ -315,8 +320,9 @@ export default function AutoAnalyzer({
           </div>
         )}
 
-        <label className="font-medium">Headers (JSON)</label>
+        <label htmlFor="auto-headers" className="font-medium">Headers (JSON)</label>
         <textarea
+          id="auto-headers"
           value={headers}
           onChange={(e) => setHeaders(e.target.value)}
           className="border px-2 py-1 rounded font-mono text-black dark:text-white bg-white dark:bg-gray-800"
@@ -325,9 +331,10 @@ export default function AutoAnalyzer({
         />
 
         {(method === "POST" || method === "PUT" || method === "PATCH") && (
-          <> 
-            <label className="font-medium">Body (JSON)</label>
+          <>
+            <label htmlFor="auto-body" className="font-medium">Body (JSON)</label>
             <textarea
+              id="auto-body"
               value={bodyJson}
               onChange={(e) => setBodyJson(e.target.value)}
               className="border px-2 py-1 rounded font-mono text-black dark:text-white bg-white dark:bg-gray-800"
