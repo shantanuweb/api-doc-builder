@@ -27,7 +27,6 @@ export default function TryItLive({
   method,
   headers,
   endpoint,
-  bodyType,
 }) {
   const [useMock, setUseMock] = useState(false);
   const [reqInput, setReqInput] = useState({});
@@ -37,7 +36,26 @@ export default function TryItLive({
 
   // Compose endpoint with path/query
   let liveEndpoint = endpoint;
-  // TODO: interpolate path/query params if desired
+  const pathKeys = (endpoint.match(/\{(\w+)\}/g) || []).map((m) =>
+    m.replace(/[{}]/g, "")
+  );
+  liveEndpoint = liveEndpoint.replace(/\{(\w+)\}/g, (_, k) =>
+    reqInput[k] !== undefined ? encodeURIComponent(reqInput[k]) : `{${k}}`
+  );
+
+  if (method === "GET") {
+    const queryPairs = requestParams
+      .filter((p) => !pathKeys.includes(p.name))
+      .map((p) => [p.name, reqInput[p.name]])
+      .filter(([, v]) => v !== undefined && v !== "");
+
+    if (queryPairs.length) {
+      const qs = queryPairs
+        .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+        .join("&");
+      liveEndpoint += (liveEndpoint.includes("?") ? "&" : "?") + qs;
+    }
+  }
 
   const handleSend = async () => {
     setIsLoading(true);
@@ -57,7 +75,8 @@ export default function TryItLive({
       const res = await fetch(liveEndpoint, {
         method,
         headers,
-        body: method === "GET" ? undefined : JSON.stringify(reqInput),
+        body: method === "GET" ? undefined :
+          bodyType === "form" ? new URLSearchParams(reqInput).toString() : JSON.stringify(reqInput),
       });
       let responseText = await res.text();
       setLiveResponse(responseText);
