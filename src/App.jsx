@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { marked } from "marked";
+import DOMPurify from "dompurify";
 import AutoAnalyzer from "./components/AutoAnalyzer";
 import ManualDocEditor from "./components/ManualDocEditor";
 import ParamsTable from "./components/ParamsTable";
@@ -485,7 +486,9 @@ export default function App() {
                     <div className="prose prose-sm dark:prose-invert bg-gray-50 dark:bg-gray-900 rounded p-3 overflow-auto min-h-[6rem]">
                       <div
                         dangerouslySetInnerHTML={{
-                          __html: marked.parse(data.integrationNotes || ""),
+                          __html: DOMPurify.sanitize(
+                            marked.parse(data.integrationNotes || "")
+                          ),
                         }}
                       />
                     </div>
@@ -555,7 +558,9 @@ export default function App() {
                       <div className="prose prose-sm dark:prose-invert bg-gray-100 dark:bg-gray-900 p-2 rounded">
                         <div
                           dangerouslySetInnerHTML={{
-                            __html: marked.parse(data.integrationNotes || ""),
+                            __html: DOMPurify.sanitize(
+                              marked.parse(data.integrationNotes || "")
+                            ),
                           }}
                         />
                       </div>
