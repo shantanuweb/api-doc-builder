@@ -5,4 +5,5 @@
 /* Optional custom tweaks for API Doc Builder UI */
 body {
   font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  line-height: 1.6;
 }
