@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
 function makeCode({ endpoint, method, headers, params, body, authType, authValue }) {
+  const contentType = (headers && headers["Content-Type"]) || "";
   let headerLines = Object.entries(headers || {})
     .map(([k, v]) => `-H "${k}: ${v}"`)
     .join(" ");
@@ -11,14 +12,37 @@ function makeCode({ endpoint, method, headers, params, body, authType, authValue
   }
 
   let curl = `curl -X ${method} "${url}" ${headerLines}`;
-  if (method !== "GET" && body) curl += ` -d '${JSON.stringify(body, null, 2)}'`;
+  if (method !== "GET" && body) {
+    if (contentType === "application/x-www-form-urlencoded") {
+      const encoded = Object.entries(body)
+        .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+        .join("&");
+      curl += ` -d '${encoded}'`;
+    } else if (contentType.includes("multipart/form-data")) {
+      const formParts = Object.entries(body)
+        .map(([k, v]) => `-F \"${k}=${v}\"`)
+        .join(" ");
+      curl += ` ${formParts}`;
+    } else {
+      curl += ` -d '${JSON.stringify(body, null, 2)}'`;
+    }
+  }
 
-  let fetchCode = `fetch("${url}", {
-  method: "${method}",
-  headers: ${JSON.stringify(headers, null, 2)},${method !== "GET" && body ? `\n  body: JSON.stringify(${JSON.stringify(body, null, 2)})` : ""}
-})
-  .then(res => res.json())
-  .then(console.log);`;
+  let fetchBody = "";
+  if (method !== "GET" && body) {
+    if (contentType === "application/x-www-form-urlencoded") {
+      fetchBody = `new URLSearchParams(${JSON.stringify(body, null, 2)}).toString()`;
+    } else if (contentType.includes("multipart/form-data")) {
+      const appendLines = Object.entries(body)
+        .map(([k, v]) => `fd.append('${k}', '${v}');`)
+        .join("\n  ");
+      fetchBody = `(() => {\n  const fd = new FormData();\n  ${appendLines}\n  return fd;\n})()`;
+    } else {
+      fetchBody = `JSON.stringify(${JSON.stringify(body, null, 2)})`;
+    }
+  }
+
+  let fetchCode = `fetch("${url}", {\n  method: "${method}",\n  headers: ${JSON.stringify(headers, null, 2)},${method !== "GET" && body ? `\n  body: ${fetchBody}` : ""}\n})\n  .then(res => res.json())\n  .then(console.log);`;
 
   let pyLines = [
     "import requests",
@@ -29,7 +53,13 @@ function makeCode({ endpoint, method, headers, params, body, authType, authValue
     pyLines.push("response = requests.get(url, headers=headers)");
   } else {
     pyLines.push(`data = ${JSON.stringify(body || {}, null, 2)}`);
-    pyLines.push(`response = requests.${method.toLowerCase()}(url, headers=headers, json=data)`);
+    if (contentType === "application/x-www-form-urlencoded") {
+      pyLines.push(`response = requests.${method.toLowerCase()}(url, headers=headers, data=data)`);
+    } else if (contentType.includes("multipart/form-data")) {
+      pyLines.push(`response = requests.${method.toLowerCase()}(url, headers=headers, files=data)`);
+    } else {
+      pyLines.push(`response = requests.${method.toLowerCase()}(url, headers=headers, json=data)`);
+    }
   }
   pyLines.push("print(response.json())");
   let python = pyLines.join("\n");
