@@ -10,6 +10,7 @@ import TryItLive from "./components/TryItLive";
 import CodeSamples from "./components/CodeSamples";
 import SwaggerExplorerView from "./components/SwaggerExplorerView";
 import RequestSettings from "./components/RequestSettings";
+import generateIntegrationNotes from "./utils/integrationNotes";
 
 export default function App() {
   // State for projects/endpoints and active endpoint
@@ -402,12 +403,30 @@ export default function App() {
                     <h2 className="font-semibold text-lg mb-0 text-indigo-700 dark:text-indigo-300">
                       Integration Notes
                     </h2>
-                    <button
-                      className="text-xs text-indigo-600 underline px-2 py-1"
-                      onClick={() => setShowNotesPreview((v) => !v)}
-                    >
-                      {showNotesPreview ? "Edit" : "Preview"}
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        className="text-xs text-indigo-600 underline px-2 py-1"
+                        onClick={() => setShowNotesPreview((v) => !v)}
+                      >
+                        {showNotesPreview ? "Edit" : "Preview"}
+                      </button>
+                      <button
+                        className="text-xs text-indigo-600 underline px-2 py-1"
+                        onClick={() =>
+                          setData((d) => ({
+                            ...d,
+                            integrationNotes: generateIntegrationNotes({
+                              data: d,
+                              requestParams,
+                              responseParams,
+                            }),
+                          }))
+                        }
+                        title="Auto generate from current details"
+                      >
+                        Generate
+                      </button>
+                    </div>
                   </div>
                   {showNotesPreview ? (
                     <div className="prose prose-sm dark:prose-invert bg-gray-50 dark:bg-gray-900 rounded p-3 overflow-auto min-h-[6rem]">
