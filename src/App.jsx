@@ -252,6 +252,7 @@ export default function App() {
         >
           {isDark ? 'Light' : 'Dark'} Mode
         </button>
+  {/* fixed closing tags */}
      </header>
 
       <div className="max-w-7xl mx-auto py-8 px-2 flex">
