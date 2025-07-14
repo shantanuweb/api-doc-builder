@@ -209,22 +209,23 @@ export default function App() {
             {explorerView ? "Editor View" : "Explorer View"}
           </button>
         </div>
+        <div className="flex items-center gap-4">
           {/* Export Dropdown */}
           <div className="relative" id="exportDropdown">
             <button
-              className="ml-4 bg-indigo-600 text-white px-3 py-2 rounded"
+              className="bg-indigo-600 text-white px-3 py-2 rounded"
               onClick={() => setExportOpen((v) => !v)}
             >
               Export Documentation ▼
             </button>
-          {exportOpen && (
-            <div className="absolute mt-1 bg-white dark:bg-gray-800 border rounded shadow-lg z-10 min-w-[180px]">
-              <button
-                onClick={() => { handleExportPDF(); setExportOpen(false); }}
-                className="block w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                PDF
-              </button>
+            {exportOpen && (
+              <div className="absolute mt-1 bg-white dark:bg-gray-800 border rounded shadow-lg z-10 min-w-[180px]">
+                <button
+                  onClick={() => { handleExportPDF(); setExportOpen(false); }}
+                  className="block w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  PDF
+                </button>
                 <button
                   onClick={() => { handleExportMarkdown(); setExportOpen(false); }}
                   className="block w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -242,18 +243,18 @@ export default function App() {
                   className="block w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   OpenAPI
-              </button>
-            </div>
-          )}
+                </button>
+              </div>
+            )}
+          </div>
+          <button
+            className="px-3 py-2 rounded bg-gray-200 dark:bg-gray-700 text-sm"
+            onClick={() => setIsDark((v) => !v)}
+          >
+            {isDark ? "Light" : "Dark"} Mode
+          </button>
         </div>
-        <button
-          className="ml-4 px-3 py-2 rounded bg-gray-200 dark:bg-gray-700 text-sm"
-          onClick={() => setIsDark((v) => !v)}
-        >
-          {isDark ? 'Light' : 'Dark'} Mode
-        </button>
-  {/* fixed closing tags */}
-     </header>
+      </header>
 
       <div className="max-w-7xl mx-auto py-8 px-2 flex">
         {/* Sidebar (only if endpoints imported) */}
