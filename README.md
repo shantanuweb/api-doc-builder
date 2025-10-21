@@ -30,7 +30,7 @@ A modern, open-source web app to **generate, preview, and export API documentati
 
 ## 🚀 Quick Start
 
-1. **Clone & install:**
+1. **Clone the repo and install dependencies:**
 
    ```bash
 git clone https://github.com/shantanuweb/api-doc-builder.git
